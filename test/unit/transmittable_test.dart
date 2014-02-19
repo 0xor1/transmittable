@@ -8,7 +8,7 @@ bool _registeredTransmittableTypes = false;
 void _registerTransmittableTypes(){
   if(_registeredTransmittableTypes){return;}
   _registeredTransmittableTypes = true;
-  registerTransmittableType('p', Person, (p)=>p.toTranString, (s)=>new Person.fromTranSring(s));
+  registerTranType('p', Person, (p)=>p.toTranString, (s)=>new Person.fromTranSring(s));
 }
 
 
@@ -46,31 +46,31 @@ void main(){
     test('supports numbers',(){
       var tran = new Transmittable()
       ..num = 23;
-      expect(tran.toJson(), equals('{num:23}'));
+      expect(tran.toTranString(), equals('num:23'));
     });
 
     test('supports bools',(){
       var tran = new Transmittable()
       ..bool = true;
-      expect(tran.toJson(), equals('{bool:true}'));
+      expect(tran.toTranString(), equals('bool:t'));
     });
 
     test('supports strings',(){
       var tran = new Transmittable()
       ..string = 'Hello World';
-      expect(tran.toJson(), equals('{string:"Hello World"}'));
+      expect(tran.toTranString(), equals('string:11"Hello World"'));
     });
 
     test('supports datetimes',(){
       var tran = new Transmittable();
       var dt = tran.datetime = new DateTime.now();
-      expect(tran.toJson(), equals('{datetime:{dt:${dt.toString()}}}'));
+      expect(tran.toTranString(), equals('datetime:dt:${dt.toString().length}:${dt.toString()}'));
     });
 
     test('supports durations',(){
       var tran = new Transmittable();
       var dur = tran.duration = new Duration(days:23, seconds: 4, milliseconds: 456);
-      expect(tran.toJson(), equals('{duration:{dur:${dur.inMilliseconds}}}'));
+      expect(tran.toTranString(), equals('duration:dur:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
     });
 
     test('supports lists',(){
@@ -78,14 +78,14 @@ void main(){
       var dt = new DateTime.now();
       var dur = new Duration(days:147, seconds: 78, milliseconds: 2);
       tran.list = [12, "Hi", true, dt, dur];
-      expect(tran.toJson(), equals('{list:[12,"Hi",true,{dt:${dt.toString()}},{dur:${dur.inMilliseconds}}]}'));
+      expect(tran.toTranString(), equals('list:[12,2"Hi",t,dt:${dt.toString().length}:${dt.toString()},dur:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}]'));
     });
 
     test('supports custom types',(){
       var tran = new Transmittable();
       var person = tran.person = new Person('Joe Bloggs', 23);
       var p = new Person.fromTranSring(person.toTranString);
-      expect(tran.toJson(), equals('{person:{p:"Joe Bloggs"23,0}}'));
+      expect(tran.toTranString(), equals('person:p:16:"Joe Bloggs"23,0'));
     });
 
     test('doesnt support unregistered types', (){

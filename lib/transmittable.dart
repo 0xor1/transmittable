@@ -2,49 +2,55 @@
  * author: Daniel Robinson http://github.com/0xor1
  */
 
+/**
+ * Data structures for serializing/deserializing typed objects
+ */
 library Transmittable;
 
 import 'dart:mirrors';
 
 /**
- * Register custom types with a given [String] [key] to make it transmittable.
+ * Registers custom types with a given [String] [key] to make it transmittable.
  */
-void registerTransmittableType(String key, Type type, ToTransmittableString toString, FromTransmittableString fromString){
-  new _TransmittableType(key, type, toString, fromString);
+void registerTranType(String key, Type type, ToTranString toStr, FromTranString fromStr){
+  if(key.contains(new RegExp(r'^\d|,|:'))){
+    throw 'Key "$key" invalid, it may not start with a number or contain any commas or colons.';
+  }
+  new _TranType(key, type, toStr, fromStr);
 }
 
 /**
  * Signature for a function which takes an object of type [T] and returns
  * a [String] representation of that object.
  */
-typedef String ToTransmittableString<T>(T obj);
+typedef String ToTranString<T>(T obj);
 
 /**
  *  Signature for a function which takes a string representation of an
  *  object of type [T] and returns an instance of that object.
  */
-typedef T FromTransmittableString<T>(String str);
+typedef T FromTranString<T>(String str);
 
 
-class _TransmittableType{
+class _TranType{
 
-  static final Map<String, _TransmittableType> _stringIndex = new Map<String, _TransmittableType>();
-  static final Map<Type, _TransmittableType> _typeIndex = new Map<Type, _TransmittableType>();
-  static bool _coreTypesHaveBeenRegistered = false;
+  static final Map<String, _TranType> _stringIndex = new Map<String, _TranType>();
+  static final Map<Type, _TranType> _typeIndex = new Map<Type, _TranType>();
+  static bool _extraCoreTypesRegistered = false;
   static void _registerCoreTypes(){
-    if(_coreTypesHaveBeenRegistered){return;}
-    _coreTypesHaveBeenRegistered = true;
-    registerTransmittableType('dt', DateTime, (DateTime dt) => dt.toString(), (String dt) => DateTime.parse(dt));
-    registerTransmittableType('dur', Duration, (Duration dur) => '${dur.inMilliseconds}', (String dur) => new Duration(milliseconds: num.parse(dur)));
+    if(_extraCoreTypesRegistered){return;}
+    _extraCoreTypesRegistered = true;
+    registerTranType('dt', DateTime, (DateTime dt) => dt.toString(), (String dt) => DateTime.parse(dt));
+    registerTranType('dur', Duration, (Duration dur) => '${dur.inMilliseconds}', (String dur) => new Duration(milliseconds: num.parse(dur)));
     //TODO add more core types as seems appropriate
   }
 
   final String _key;
   final Type _type;
-  final ToTransmittableString _toString;
-  final FromTransmittableString _fromString;
+  final ToTranString _toStr;
+  final FromTranString _fromStr;
 
-  _TransmittableType(String this._key, Type this._type, ToTransmittableString this._toString, FromTransmittableString this._fromString){
+  _TranType(String this._key, Type this._type, ToTranString this._toStr, FromTranString this._fromStr){
     _registerCoreTypes();
     if(_stringIndex.containsKey(_key)){
       throw 'Key "$_key" has already been registered with type "$_type".';
@@ -60,21 +66,21 @@ class _TransmittableType{
 class Transmittable{
 
   static List<Type> getRegisterdTypes(){
-    return [num, bool, String, List]..addAll(_TransmittableType._typeIndex.keys);
+    return [num, bool, String, List]..addAll(_TranType._typeIndex.keys);
   }
 
   static List<String> getRegisterdKeys(){
-    return _TransmittableType._stringIndex.keys;
+    return _TranType._stringIndex.keys;
   }
 
   final Map<String, dynamic> _internal = new Map<String, dynamic>();
 
   Transmittable(){
-    _TransmittableType._registerCoreTypes();
+    _TranType._registerCoreTypes();
   }
 
-  Transmittable.fromTransmittableString(String str){
-    _TransmittableType._registerCoreTypes();
+  Transmittable.fromTranString(String str){
+    _TranType._registerCoreTypes();
     //TODO
   }
 
@@ -102,41 +108,49 @@ class Transmittable{
     super.noSuchMethod(inv);
   }
 
-  String toJson(){
-    String json = '{';
-    _internal.forEach((k, v){
-      json = '$json$k:${_convertValueToString(v)},';
+  String toTranString(){
+    var strB = new StringBuffer();
+    var keys = _internal.keys;
+    var len = keys.length;
+    keys.forEach((k){
+      var v = _internal[k];
+      strB.write('$k:${_getValueString(v)}');
+      if(k != keys.last){
+        strB.write(',');
+      }
     });
-    //cut off the last comma
-    json = json.substring(0, json.length - 1);
-    return '$json}';
+    return strB.toString();
   }
 
-  String _convertValueToString(dynamic v){
-    String str;
-    if(v is num || v is bool){
-      str = v.toString();
+  String _getValueString(dynamic v){
+    if(v is num){
+      return v.toString();
+    }else if(v is bool){
+      return v.toString().substring(0,1);
     }else if(v is String){
-      str = '"$v"';
+      return '${v.length}"$v"';
     }else if(v is List){
-      str = '[';
-      v.forEach((o){
-        str = '$str${_convertValueToString(o)},';
+      var strB = new StringBuffer();
+      strB.write('[');
+      var len = v.length;
+      v.forEach((i){
+        strB.write(_getValueString(i));
+        if(i != v.last){
+          strB.write(',');
+        }
       });
-      //cut off last comma
-      str = str.substring(0,str.length - 1);
-      str = '$str]';
+      return (strB..write(']')).toString();
     }else{
       //custom type, requires the user to have register a transmittable type converter methods
       Type type = reflect(v).type.reflectedType;
-      var tranType = _TransmittableType._typeIndex[type]; //NOTE: will probably require to handle derived types i.e. if a subtype wants to be converted this should be able to find the registered super type.
+      var tranType = _TranType._typeIndex[type]; //NOTE: will probably require to handle derived types i.e. if a subtype wants to be converted this should be able to find the registered super type.
       if(tranType == null){
-        throw 'Type "${type}" has not been register with registerTransmittableType().';
+        throw 'Type "${type}" has not been registered with registerTranType().';
       }else{
-        str = '{${tranType._key}:${tranType._toString(v)}}';
+        var tranStr = tranType._toStr(v);
+        return '${tranType._key}:${tranStr.length}:$tranStr';
       }
     }
-    return str;
   }
 
   _checkTypeIsRegistered(dynamic v){
@@ -147,7 +161,7 @@ class Transmittable{
       return;
     }else{
       Type type = reflect(v).type.reflectedType;
-      if(_TransmittableType._typeIndex.containsKey(type) == false){
+      if(_TranType._typeIndex.containsKey(type) == false){
         throw 'Type "$type" is not registerd.';
       }
     }
