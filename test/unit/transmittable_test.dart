@@ -58,7 +58,7 @@ void main(){
     test('supports strings',(){
       var tran = new Transmittable()
       ..string = 'Hello World';
-      expect(tran.toTranString(), equals('string:11"Hello World"'));
+      expect(tran.toTranString(), equals('string:11:Hello World'));
     });
 
     test('supports datetimes',(){
@@ -78,7 +78,7 @@ void main(){
       var dt = new DateTime.now();
       var dur = new Duration(days:147, seconds: 78, milliseconds: 2);
       tran.list = [12, "Hi", true, dt, dur];
-      expect(tran.toTranString(), equals('list:[12,2"Hi",t,dt:${dt.toString().length}:${dt.toString()},dur:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}]'));
+      expect(tran.toTranString(), equals('list:[12,2:Hi,t,dt:${dt.toString().length}:${dt.toString()},dur:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}]'));
     });
 
     test('supports custom types',(){
@@ -91,6 +91,13 @@ void main(){
     test('doesnt support unregistered types', (){
       var tran = new Transmittable();
       expect(() => tran.unreg = new UnRegisteredType(), throwsA(new isInstanceOf<String>()));
+    });
+
+    test('supports nested transmittables', (){
+      var tran = new Transmittable()
+      ..num = 3
+      ..tran = (new Transmittable()..str = "hi");
+      expect(tran.toTranString(), equals('num:3,tran:{str:2:hi}'));
     });
 
   });

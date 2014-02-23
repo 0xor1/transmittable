@@ -128,7 +128,7 @@ class Transmittable{
     }else if(v is bool){
       return v.toString().substring(0,1);
     }else if(v is String){
-      return '${v.length}"$v"';
+      return '${v.length}:$v';
     }else if(v is List){
       var strB = new StringBuffer();
       strB.write('[');
@@ -140,6 +140,8 @@ class Transmittable{
         }
       });
       return (strB..write(']')).toString();
+    }else if(v is Transmittable){
+      return '{${v.toTranString()}}';
     }else{
       //custom type, requires the user to have register a transmittable type converter methods
       Type type = reflect(v).type.reflectedType;
@@ -154,7 +156,7 @@ class Transmittable{
   }
 
   _checkTypeIsRegistered(dynamic v){
-    if(v is num || v is bool || v is String){
+    if(v is num || v is bool || v is String || v is Transmittable){
       return;
     }else if(v is List){
       v.forEach((o) => _checkTypeIsRegistered(o));
