@@ -13,6 +13,7 @@ import 'dart:mirrors';
  * Registers custom types with a given [String] [key] to make it transmittable.
  */
 void registerTranType(String key, Type type, ToTranString toStr, FromTranString fromStr){
+  _TranType._registerCoreTypes();
   if(key.contains(new RegExp(r'^\d|,|:'))){
     throw 'Key "$key" invalid, it may not start with a number or contain any commas or colons.';
   }
