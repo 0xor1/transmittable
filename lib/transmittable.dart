@@ -14,8 +14,8 @@ import 'dart:mirrors';
  */
 void registerTranType(String key, Type type, ToTranString toStr, FromTranString fromStr){
   _registerAdditionalCoreTypes();
-  if(key.contains(new RegExp(r'^\d|,|:'))){
-    throw 'Key "$key" invalid, it may not start with a number or contain any commas or colons.';
+  if(key.contains(new RegExp(r'^\d|,|:|{|}|[|]'))){
+    throw 'Key "$key" invalid, it may not start with a number or contain any of the following characters ,:{}[]';
   }
   new _TranType(key, type, toStr, fromStr);
 }
