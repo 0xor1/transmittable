@@ -9,13 +9,20 @@ library Transmittable;
 
 import 'dart:mirrors';
 
+part '_tran_type.dart';
+part 'tran_method_error.dart';
+part 'duplicate_tran_key_error.dart';
+part 'duplicate_tran_type_error.dart';
+part 'unregistered_tran_type_error.dart';
+part 'invalid_tran_key_error.dart';
+
 /**
- * Registers custom types with a given [String] [key] to make it transmittable.
+ * Registers a [type] with a given [key] to make it transmittable.
  */
 void registerTranType(String key, Type type, ToTranString toStr, FromTranString fromStr){
   _registerAdditionalCoreTypes();
   if(key.contains(new RegExp(r'^\d|,|:|{|}|[|]'))){
-    throw 'Key "$key" invalid, it may not start with a number or contain any of the following characters ,:{}[]';
+    throw new InvalidTranKeyError(key);
   }
   new _TranType(key, type, toStr, fromStr);
 }
@@ -43,25 +50,6 @@ void _registerAdditionalCoreTypes(){
   //TODO add more core types as seems appropriate
 }
 
-class _TranType{
-
-  final String _key;
-  final Type _type;
-  final ToTranString _toStr;
-  final FromTranString _fromStr;
-
-  _TranType(String this._key, Type this._type, ToTranString this._toStr, FromTranString this._fromStr){
-    _registerAdditionalCoreTypes();
-    if(_tranTypesByKey.containsKey(_key)){
-      throw 'Key "$_key" has already been registered with type "$_type".';
-    }else if(_tranTypesByType.containsKey(_type)){
-      throw 'Type "$_type" has already been registered with key "$_key".';
-    }else{
-      _tranTypesByKey[_key] = _tranTypesByType[_type] = this;
-    }
-  }
-}
-
 @proxy
 class Transmittable{
 
@@ -87,7 +75,7 @@ class Transmittable{
   noSuchMethod(Invocation inv){
 
     if(inv.isMethod){
-      throw 'Methods are not transmittable.';
+      throw new TranMethodError(MirrorSystem.getName(inv.memberName));
     }
 
     int positionalArgs = (inv.positionalArguments != null) ? inv.positionalArguments.length : 0;
@@ -143,15 +131,10 @@ class Transmittable{
     }else if(v is Transmittable){
       return '{${v.toTranString()}}';
     }else{
-      //custom type, requires the user to have register a transmittable type converter methods
       Type type = reflect(v).type.reflectedType;
       var tranType = _tranTypesByType[type]; //NOTE: will probably require to handle derived types i.e. if a subtype wants to be converted this should be able to find the registered super type.
-      if(tranType == null){
-        throw 'Type "${type}" has not been registered with registerTranType().';
-      }else{
-        var tranStr = tranType._toStr(v);
-        return '${tranType._key}:${tranStr.length}:$tranStr';
-      }
+      var tranStr = tranType._toStr(v);
+      return '${tranType._key}:${tranStr.length}:$tranStr';
     }
   }
 
@@ -164,7 +147,7 @@ class Transmittable{
     }else{
       Type type = reflect(v).type.reflectedType;
       if(_tranTypesByType.containsKey(type) == false){
-        throw 'Type "$type" is not registerd.';
+        throw new UnregisteredTranTypeError(type);
       }
     }
   }

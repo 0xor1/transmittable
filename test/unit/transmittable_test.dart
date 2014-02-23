@@ -90,7 +90,7 @@ void main(){
 
     test('doesnt support unregistered types', (){
       var tran = new Transmittable();
-      expect(() => tran.unreg = new UnRegisteredType(), throwsA(new isInstanceOf<String>()));
+      expect(() => tran.unreg = new UnRegisteredType(), throwsA(new isInstanceOf<UnregisteredTranTypeError>()));
     });
 
     test('supports nested transmittables', (){
