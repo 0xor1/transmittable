@@ -13,7 +13,7 @@ import 'dart:mirrors';
  * Registers custom types with a given [String] [key] to make it transmittable.
  */
 void registerTranType(String key, Type type, ToTranString toStr, FromTranString fromStr){
-  _TranType._registerCoreTypes();
+  _registerAdditionalCoreTypes();
   if(key.contains(new RegExp(r'^\d|,|:'))){
     throw 'Key "$key" invalid, it may not start with a number or contain any commas or colons.';
   }
@@ -32,19 +32,18 @@ typedef String ToTranString<T>(T obj);
  */
 typedef T FromTranString<T>(String str);
 
+final Map<String, _TranType> _tranTypesByKey = new Map<String, _TranType>();
+final Map<Type, _TranType> _tranTypesByType = new Map<Type, _TranType>();
+bool _additionalCoreTypesRegistered = false;
+void _registerAdditionalCoreTypes(){
+  if(_additionalCoreTypesRegistered){return;}
+  _additionalCoreTypesRegistered = true;
+  registerTranType('dt', DateTime, (DateTime dt) => dt.toString(), (String dt) => DateTime.parse(dt));
+  registerTranType('dur', Duration, (Duration dur) => '${dur.inMilliseconds}', (String dur) => new Duration(milliseconds: num.parse(dur)));
+  //TODO add more core types as seems appropriate
+}
 
 class _TranType{
-
-  static final Map<String, _TranType> _stringIndex = new Map<String, _TranType>();
-  static final Map<Type, _TranType> _typeIndex = new Map<Type, _TranType>();
-  static bool _extraCoreTypesRegistered = false;
-  static void _registerCoreTypes(){
-    if(_extraCoreTypesRegistered){return;}
-    _extraCoreTypesRegistered = true;
-    registerTranType('dt', DateTime, (DateTime dt) => dt.toString(), (String dt) => DateTime.parse(dt));
-    registerTranType('dur', Duration, (Duration dur) => '${dur.inMilliseconds}', (String dur) => new Duration(milliseconds: num.parse(dur)));
-    //TODO add more core types as seems appropriate
-  }
 
   final String _key;
   final Type _type;
@@ -52,13 +51,13 @@ class _TranType{
   final FromTranString _fromStr;
 
   _TranType(String this._key, Type this._type, ToTranString this._toStr, FromTranString this._fromStr){
-    _registerCoreTypes();
-    if(_stringIndex.containsKey(_key)){
+    _registerAdditionalCoreTypes();
+    if(_tranTypesByKey.containsKey(_key)){
       throw 'Key "$_key" has already been registered with type "$_type".';
-    }else if(_typeIndex.containsKey(_type)){
+    }else if(_tranTypesByType.containsKey(_type)){
       throw 'Type "$_type" has already been registered with key "$_key".';
     }else{
-      _stringIndex[_key] = _typeIndex[_type] = this;
+      _tranTypesByKey[_key] = _tranTypesByType[_type] = this;
     }
   }
 }
@@ -67,21 +66,21 @@ class _TranType{
 class Transmittable{
 
   static List<Type> getRegisterdTypes(){
-    return [num, bool, String, List]..addAll(_TranType._typeIndex.keys);
+    return [num, bool, String, List]..addAll(_tranTypesByType.keys);
   }
 
   static List<String> getRegisterdKeys(){
-    return _TranType._stringIndex.keys;
+    return _tranTypesByKey.keys;
   }
 
   final Map<String, dynamic> _internal = new Map<String, dynamic>();
 
   Transmittable(){
-    _TranType._registerCoreTypes();
+    _registerAdditionalCoreTypes();
   }
 
   Transmittable.fromTranString(String str){
-    _TranType._registerCoreTypes();
+    _registerAdditionalCoreTypes();
     //TODO
   }
 
@@ -146,7 +145,7 @@ class Transmittable{
     }else{
       //custom type, requires the user to have register a transmittable type converter methods
       Type type = reflect(v).type.reflectedType;
-      var tranType = _TranType._typeIndex[type]; //NOTE: will probably require to handle derived types i.e. if a subtype wants to be converted this should be able to find the registered super type.
+      var tranType = _tranTypesByType[type]; //NOTE: will probably require to handle derived types i.e. if a subtype wants to be converted this should be able to find the registered super type.
       if(tranType == null){
         throw 'Type "${type}" has not been registered with registerTranType().';
       }else{
@@ -164,7 +163,7 @@ class Transmittable{
       return;
     }else{
       Type type = reflect(v).type.reflectedType;
-      if(_TranType._typeIndex.containsKey(type) == false){
+      if(_tranTypesByType.containsKey(type) == false){
         throw 'Type "$type" is not registerd.';
       }
     }
