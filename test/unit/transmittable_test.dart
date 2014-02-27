@@ -27,11 +27,11 @@ class Person{
   Person._internal(this.name, this.age, this.socialSecurity);
 
   factory Person.fromTranSring(String s){
-    var strs = s.split(new RegExp('"|,'))..removeAt(0);
+    var strs = s.split(',');
     return new Person._internal(strs[0], num.parse(strs[1]), num.parse(strs[2]));
   }
 
-  String get toTranString => '"$name"$age,$socialSecurity';
+  String get toTranString => '$name,$age,$socialSecurity';
   operator ==(other) => socialSecurity == other.socialSecurity;
   int get hashCode => socialSecurity.hashCode;
 }
@@ -46,31 +46,36 @@ void main(){
     test('supports numbers',(){
       var tran = new Transmittable()
       ..num = 23;
-      expect(tran.toTranString(), equals('num:23'));
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('num:n:2:23'));
     });
 
     test('supports bools',(){
       var tran = new Transmittable()
       ..bool = true;
-      expect(tran.toTranString(), equals('bool:t'));
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('bool:b:1:t'));
     });
 
     test('supports strings',(){
       var tran = new Transmittable()
       ..string = 'Hello World';
-      expect(tran.toTranString(), equals('string:11:Hello World'));
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('string:s:11:Hello World'));
     });
 
     test('supports datetimes',(){
       var tran = new Transmittable();
       var dt = tran.datetime = new DateTime.now();
-      expect(tran.toTranString(), equals('datetime:dt:${dt.toString().length}:${dt.toString()}'));
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('datetime:d:23:${dt.toString()}'));
     });
 
     test('supports durations',(){
       var tran = new Transmittable();
       var dur = tran.duration = new Duration(days:23, seconds: 4, milliseconds: 456);
-      expect(tran.toTranString(), equals('duration:dur:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('duration:du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
     });
 
     test('supports lists',(){
@@ -78,26 +83,29 @@ void main(){
       var dt = new DateTime.now();
       var dur = new Duration(days:147, seconds: 78, milliseconds: 2);
       tran.list = [12, "Hi", true, dt, dur];
-      expect(tran.toTranString(), equals('list:[12,2:Hi,t,dt:${dt.toString().length}:${dt.toString()},dur:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}]'));
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('list:l:62:n:2:12s:2:Hib:1:td:23:${dt.toString()}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
     });
 
     test('supports custom types',(){
       var tran = new Transmittable();
       var person = tran.person = new Person('Joe Bloggs', 23);
       var p = new Person.fromTranSring(person.toTranString);
-      expect(tran.toTranString(), equals('person:p:16:"Joe Bloggs"23,0'));
-    });
-
-    test('doesnt support unregistered types', (){
-      var tran = new Transmittable();
-      expect(() => tran.unreg = new UnRegisteredType(), throwsA(new isInstanceOf<UnregisteredTranTypeError>()));
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('person:p:15:Joe Bloggs,23,0'));
     });
 
     test('supports nested transmittables', (){
       var tran = new Transmittable()
       ..num = 3
       ..tran = (new Transmittable()..str = "hi");
-      expect(tran.toTranString(), equals('num:3,tran:{str:2:hi}'));
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('num:n:1:3tran:t:10:str:s:2:hi'));
+    });
+
+    test('doesnt support unregistered types', (){
+      var tran = new Transmittable();
+      expect(() => tran.unreg = new UnRegisteredType(), throwsA(new isInstanceOf<UnregisteredTranTypeError>()));
     });
 
   });

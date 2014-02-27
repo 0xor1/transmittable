@@ -5,7 +5,7 @@
 part of Transmittable;
 
 class InvalidTranKeyError{
-  String get message => 'Key "$key" is invalid. Tran keys must not start with a number or contain any of the following characters ,:{}[]';
+  String get message => 'Key "$key" is invalid. Tran keys must not contain a colon character ":"';
   final String key;
   InvalidTranKeyError(String this.key);
 }
