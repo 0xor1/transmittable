@@ -3,7 +3,7 @@
  */
 
 /**
- * Data structures for serializing/deserializing typed objects
+ * Data structures for de/serializing typed objects to and from strings
  */
 library Transmittable;
 
@@ -20,7 +20,7 @@ part 'invalid_tran_key_error.dart';
  * Registers a [type] with a given [key] to make it transmittable.
  */
 void registerTranType(String key, Type type, ToTranString toStr, FromTranString fromStr){
-  _registerCoreTypes();
+  registerCoreTypes();
   if(key.contains(new RegExp(r':'))){
     throw new InvalidTranKeyError(key);
   }else if(_tranTypesByKey.containsKey(key)){
@@ -62,18 +62,18 @@ class Transmittable{
   final Map<String, dynamic> _internal = new Map<String, dynamic>();
 
   Transmittable(){
-    _registerCoreTypes();
+    registerCoreTypes();
   }
 
   Transmittable.fromTranString(String s){
-    _registerCoreTypes();
+    registerCoreTypes();
     int start = 0;
     while(start < s.length){
       int end;
       List<String> parts = new List<String>(); //0 is name, 1 is key, 2 is data length, 3 is data
       for(var i = 0; i < 4; i++){
-        end = i < 3 ? s.indexOf(':', start) : num.parse(parts[2]);
-        parts[i] = s.substring(start, end);
+        end = i < 3 ? s.indexOf(':', start) : start + num.parse(parts[2]);
+        parts.add(s.substring(start, end));
         start = i < 3 ? end + 1 : end;
       }
       var tranType = _tranTypesByKey[parts[1]];
@@ -150,7 +150,7 @@ _checkTypeIsRegistered(dynamic v){
 final Map<String, _TranType> _tranTypesByKey = new Map<String, _TranType>();
 final Map<Type, _TranType> _tranTypesByType = new Map<Type, _TranType>();
 bool _coreTypesRegistered = false;
-void _registerCoreTypes(){
+void registerCoreTypes(){
   if(_coreTypesRegistered){return;}
   _coreTypesRegistered = true;
   registerTranType('n', num, (num n) => n.toString(), (String s) => num.parse(s));
@@ -173,8 +173,8 @@ dynamic _processStringBackToListsAndSets(dynamic col, String s){
     int end;
     List<String> parts = new List<String>(); //0 is key, 1 is data length, 2 is data
     for(var i = 0; i < 3; i++){
-      end = i < 2 ? s.indexOf(':', start) : num.parse(parts[1]);
-      parts[i] = s.substring(start, end);
+      end = i < 2 ? s.indexOf(':', start) : start + num.parse(parts[1]);
+      parts.add(s.substring(start, end));
       start = i < 2 ? end + 1 : end;
     }
     var tranType = _tranTypesByKey[parts[0]];
@@ -198,8 +198,8 @@ Map<dynamic, dynamic> _processStringBackToMap(String s){
     for(var i = 0; i < 2; i++){
       List<String> parts = new List<String>(); //0 is key, 1 is data length, 2 is data
       for(var j = 0; j < 3; j++){
-        end = j < 2 ? s.indexOf(':', start) : num.parse(parts[1]);
-        parts[j] = s.substring(start, end);
+        end = j < 2 ? s.indexOf(':', start) : start + num.parse(parts[1]);
+        parts.add(s.substring(start, end));
         start = j < 2 ? end + 1 : end;
       }
       var tranType = _tranTypesByKey[parts[0]];
