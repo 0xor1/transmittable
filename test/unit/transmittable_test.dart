@@ -109,6 +109,38 @@ void main(){
       expect(reTran.list[4], equals(dur));
     });
 
+    test('supports sets',(){
+      var tran = new Transmittable();
+      var dt = new DateTime.now();
+      var dur = new Duration(days:147, seconds: 78, milliseconds: 2);
+      var contents = [12, 'Hi', true, dt, dur];
+      tran.set = new Set()..addAll(contents);
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('set:se:62:n:2:12s:2:Hib:1:td:23:${dt.toString()}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
+      var reTran = new Transmittable.fromTranString(tranStr);
+      expect(reTran.set.containsAll(contents), equals(true));
+    });
+
+    test('supports maps',(){
+      var tran = new Transmittable();
+      var dt = new DateTime.now();
+      var dur = new Duration(days:147, seconds: 78, milliseconds: 2);
+      tran.map = new Map<dynamic, dynamic>()
+      ..[12] = 12
+      ..['Hi'] = 'Hi'
+      ..[true] = false
+      ..[dt] = dt
+      ..[dur] = dur;
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('map:m:124:n:2:12n:2:12s:2:His:2:Hib:1:tb:1:fd:23:${dt.toString()}d:23:${dt.toString()}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
+      var reTran = new Transmittable.fromTranString(tranStr);
+      expect(reTran.map[12], equals(12));
+      expect(reTran.map['Hi'], equals('Hi'));
+      expect(reTran.map[true], equals(false));
+      expect(reTran.map[dt], equals(dt));
+      expect(reTran.map[dur], equals(dur));
+    });
+
     test('supports custom types',(){
       var tran = new Transmittable();
       var person = tran.person = new Person('Joe Bloggs', 23);
