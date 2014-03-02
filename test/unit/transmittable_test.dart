@@ -141,6 +141,13 @@ void main(){
       expect(reTran.map[dur], equals(dur));
     });
 
+    test('supports regexp',(){
+      var tran = new Transmittable();
+      tran.regexp = new RegExp(r'^[a-z]\n', caseSensitive: false, multiLine: true);
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals(r'regexp:r:12:8:^[a-z]\nft'));
+    });
+
     test('supports custom types',(){
       var tran = new Transmittable();
       var person = tran.person = new Person('Joe Bloggs', 23);

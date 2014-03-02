@@ -128,7 +128,7 @@ String _getTranSectionFromValue(dynamic v){
 }
 
 _checkTypeIsRegistered(dynamic v){
-  if(v is num || v is bool || v is String){
+  if(v is num || v is bool || v is String || v is RegExp){
     return;
   }else if(v is List || v is Set){
     v.forEach((o) => _checkTypeIsRegistered(o));
@@ -159,7 +159,7 @@ void registerCoreTypes(){
   registerTranType('l', List, (List l) => _processIterableToString(l), (String s) => _processStringBackToListsAndSets(new List(), s));
   registerTranType('se', Set, (Set se) => _processIterableToString(se), (String s) => _processStringBackToListsAndSets(new Set(), s));
   registerTranType('m', Map, (Map m) => _processMapToString(m), (String s) => _processStringBackToMap(s));
-  registerTranType('r', RegExp, (RegExp r){ /*TODO*/ }, (String s){ /*TODO*/ });
+  registerTranType('r', RegExp, (RegExp r){ var p = r.pattern; var c = r.isCaseSensitive? 't': 'f'; var m = r.isMultiLine? 't': 'f'; return '${p.length}:${p}$c$m'; }, (String s){ var start = s.indexOf(':') + 1; var end = start + num.parse(s.substring(0, start - 1)); var p = s.substring(start, end); var c = s.substring(end, end + 1) == 't'; var m = s.substring(end + 1, end + 2) == 't'; return new RegExp(p, caseSensitive: c, multiLine: m); });
   registerTranType('d', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
   registerTranType('du', Duration, (Duration dur) => '${dur.inMilliseconds}', (String s) => new Duration(milliseconds: num.parse(s)));
   //adding in Transmittable here too
