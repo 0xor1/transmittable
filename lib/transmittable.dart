@@ -65,8 +65,11 @@ class Transmittable{
     registerCoreTypes();
   }
 
-  Transmittable.fromTranString(String s){
+  factory Transmittable.fromTranString(String s, [Transmittable tran]){
     registerCoreTypes();
+    if(tran == null){
+      tran = new Transmittable();
+    }
     int start = 0;
     while(start < s.length){
       int end;
@@ -77,8 +80,9 @@ class Transmittable{
         start = i < 3 ? end + 1 : end;
       }
       var tranType = _tranTypesByKey[parts[1]];
-      _internal[parts[0]] = tranType._fromStr(parts[3]);
+      tran._internal[parts[0]] = tranType._fromStr(parts[3]);
     }
+    return tran;
   }
 
   noSuchMethod(Invocation inv){
