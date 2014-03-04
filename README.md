@@ -1,6 +1,6 @@
 #Transmittable [![Build Status](https://drone.io/github.com/0xor1/transmittable/status.png)](https://drone.io/github.com/0xor1/transmittable/latest)
 
-An attempt to make a simple way of transferring *named* and *typed* properties across Http
+An attempt to make a simple way of transferring **named** and **typed** properties across Http
 connections using shallow transmittable objects.
 
 ##How To Use:
@@ -54,7 +54,7 @@ remember this method call must be made on both the client side and the server si
 
 ##Issues to be aware of
 
-if there are any circular references, for example:
+If there are any circular references, for example:
 
 ```
 var tran = Transmittable();
@@ -65,4 +65,6 @@ tran.toTranString(); // will throw a stackoverflow error
 Transmittable currently has no way of detecting if an object has previously been
 serialized, so it will attempt to serialize it again, which
 means there is the potential for infinte loops when a Transmittable attempts to
-serialize objects which form a reference loop.
+serialize objects which form a reference loop. **Transmittable** is best used 
+for simple objects for the time being to prevent this issue occuring, however
+handling of circular references is intended to be implemented in the next version. 

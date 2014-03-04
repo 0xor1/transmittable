@@ -9,7 +9,7 @@ library Transmittable;
 
 import 'dart:mirrors';
 
-part '_tran_type.dart';
+part 'src/tran_type.dart';
 part 'tran_method_error.dart';
 part 'duplicate_tran_key_error.dart';
 part 'duplicate_tran_type_error.dart';
