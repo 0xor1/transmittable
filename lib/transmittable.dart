@@ -3,13 +3,13 @@
  */
 
 /**
- * Data structures for serializing/deserializing typed objects
+ * Data structures for de/serializing typed objects to and from strings
  */
 library Transmittable;
 
 import 'dart:mirrors';
 
-part '_tran_type.dart';
+part 'src/tran_type.dart';
 part 'tran_method_error.dart';
 part 'duplicate_tran_key_error.dart';
 part 'duplicate_tran_type_error.dart';
@@ -20,7 +20,7 @@ part 'invalid_tran_key_error.dart';
  * Registers a [type] with a given [key] to make it transmittable.
  */
 void registerTranType(String key, Type type, ToTranString toStr, FromTranString fromStr){
-  _registerCoreTypes();
+  registerCoreTypes();
   if(key.contains(new RegExp(r':'))){
     throw new InvalidTranKeyError(key);
   }else if(_tranTypesByKey.containsKey(key)){
@@ -62,23 +62,27 @@ class Transmittable{
   final Map<String, dynamic> _internal = new Map<String, dynamic>();
 
   Transmittable(){
-    _registerCoreTypes();
+    registerCoreTypes();
   }
 
-  Transmittable.fromTranString(String s){
-    _registerCoreTypes();
+  factory Transmittable.fromTranString(String s, [Transmittable tran]){
+    registerCoreTypes();
+    if(tran == null){
+      tran = new Transmittable();
+    }
     int start = 0;
     while(start < s.length){
       int end;
       List<String> parts = new List<String>(); //0 is name, 1 is key, 2 is data length, 3 is data
       for(var i = 0; i < 4; i++){
-        end = i < 3 ? s.indexOf(':', start) : num.parse(parts[2]);
-        parts[i] = s.substring(start, end);
+        end = i < 3 ? s.indexOf(':', start) : start + num.parse(parts[2]);
+        parts.add(s.substring(start, end));
         start = i < 3 ? end + 1 : end;
       }
       var tranType = _tranTypesByKey[parts[1]];
-      _internal[parts[0]] = tranType._fromStr(parts[3]);
+      tran._internal[parts[0]] = tranType._fromStr(parts[3]);
     }
+    return tran;
   }
 
   noSuchMethod(Invocation inv){
@@ -128,7 +132,7 @@ String _getTranSectionFromValue(dynamic v){
 }
 
 _checkTypeIsRegistered(dynamic v){
-  if(v is num || v is bool || v is String){
+  if(v is num || v is bool || v is String || v is RegExp){
     return;
   }else if(v is List || v is Set){
     v.forEach((o) => _checkTypeIsRegistered(o));
@@ -150,7 +154,7 @@ _checkTypeIsRegistered(dynamic v){
 final Map<String, _TranType> _tranTypesByKey = new Map<String, _TranType>();
 final Map<Type, _TranType> _tranTypesByType = new Map<Type, _TranType>();
 bool _coreTypesRegistered = false;
-void _registerCoreTypes(){
+void registerCoreTypes(){
   if(_coreTypesRegistered){return;}
   _coreTypesRegistered = true;
   registerTranType('n', num, (num n) => n.toString(), (String s) => num.parse(s));
@@ -159,7 +163,7 @@ void _registerCoreTypes(){
   registerTranType('l', List, (List l) => _processIterableToString(l), (String s) => _processStringBackToListsAndSets(new List(), s));
   registerTranType('se', Set, (Set se) => _processIterableToString(se), (String s) => _processStringBackToListsAndSets(new Set(), s));
   registerTranType('m', Map, (Map m) => _processMapToString(m), (String s) => _processStringBackToMap(s));
-  registerTranType('r', RegExp, (RegExp r){ /*TODO*/ }, (String s){ /*TODO*/ });
+  registerTranType('r', RegExp, (RegExp r){ var p = r.pattern; var c = r.isCaseSensitive? 't': 'f'; var m = r.isMultiLine? 't': 'f'; return '${p.length}:${p}$c$m'; }, (String s){ var start = s.indexOf(':') + 1; var end = start + num.parse(s.substring(0, start - 1)); var p = s.substring(start, end); var c = s.substring(end, end + 1) == 't'; var m = s.substring(end + 1, end + 2) == 't'; return new RegExp(p, caseSensitive: c, multiLine: m); });
   registerTranType('d', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
   registerTranType('du', Duration, (Duration dur) => '${dur.inMilliseconds}', (String s) => new Duration(milliseconds: num.parse(s)));
   //adding in Transmittable here too
@@ -173,8 +177,8 @@ dynamic _processStringBackToListsAndSets(dynamic col, String s){
     int end;
     List<String> parts = new List<String>(); //0 is key, 1 is data length, 2 is data
     for(var i = 0; i < 3; i++){
-      end = i < 2 ? s.indexOf(':', start) : num.parse(parts[1]);
-      parts[i] = s.substring(start, end);
+      end = i < 2 ? s.indexOf(':', start) : start + num.parse(parts[1]);
+      parts.add(s.substring(start, end));
       start = i < 2 ? end + 1 : end;
     }
     var tranType = _tranTypesByKey[parts[0]];
@@ -198,8 +202,8 @@ Map<dynamic, dynamic> _processStringBackToMap(String s){
     for(var i = 0; i < 2; i++){
       List<String> parts = new List<String>(); //0 is key, 1 is data length, 2 is data
       for(var j = 0; j < 3; j++){
-        end = j < 2 ? s.indexOf(':', start) : num.parse(parts[1]);
-        parts[j] = s.substring(start, end);
+        end = j < 2 ? s.indexOf(':', start) : start + num.parse(parts[1]);
+        parts.add(s.substring(start, end));
         start = j < 2 ? end + 1 : end;
       }
       var tranType = _tranTypesByKey[parts[0]];
