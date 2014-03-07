@@ -45,10 +45,10 @@ If you would like to add additional types to be transmittable simply register th
 using the top level function:
 
 ```
-registerTranType(String key, Type type, ToTranString toStr, FromTranString fromStr)
+registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode)
 //where
-typedef String ToTranString<T>(T obj);
-typedef T FromTranString<T>(String str);
+typedef String TranEncode<T>(T obj);
+typedef T TranDecode<T>(String str);
 ```
 remember this method call must be made on both the client side and the server side.
 
