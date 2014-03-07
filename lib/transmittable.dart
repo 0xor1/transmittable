@@ -9,26 +9,26 @@ library Transmittable;
 
 import 'dart:mirrors';
 
-part 'src/tran_type.dart';
+part 'src/tran_codec.dart';
 part 'tran_method_error.dart';
 part 'duplicate_tran_key_error.dart';
 part 'duplicate_tran_type_error.dart';
-part 'unregistered_tran_type_error.dart';
+part 'unregistered_tran_codec_error.dart';
 part 'invalid_tran_key_error.dart';
 
 /**
  * Registers a [type] with a given [key] to make it transmittable.
  */
-void registerTranType(String key, Type type, ToTranString toStr, FromTranString fromStr){
+void registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode){
   registerCoreTypes();
   if(key.contains(new RegExp(r':'))){
     throw new InvalidTranKeyError(key);
-  }else if(_tranTypesByKey.containsKey(key)){
+  }else if(_tranCodecsByKey.containsKey(key)){
     throw new DuplicateTranKeyError(key, type);
-  }else if(_tranTypesByType.containsKey(type)){
-    throw new DuplicateTranTypeError(type, key);
+  }else if(_tranCodecsByType.containsKey(type)){
+    throw new DuplicateTranCodecError(type, key);
   }else{
-    _tranTypesByKey[key] = _tranTypesByType[type] = new _TranType(key, type, toStr, fromStr);
+    _tranCodecsByKey[key] = _tranCodecsByType[type] = new _TranCodec(key, type, encode, decode);
   }
 }
 
@@ -36,23 +36,23 @@ void registerTranType(String key, Type type, ToTranString toStr, FromTranString 
  * Signature for a function which takes an object of type [T] and returns
  * a [String] representation of that object.
  */
-typedef String ToTranString<T>(T obj);
+typedef String TranEncode<T>(T obj);
 
 /**
  *  Signature for a function which takes a string representation of an
  *  object of type [T] and returns an instance of that object.
  */
-typedef T FromTranString<T>(String str);
+typedef T TranDecode<T>(String str);
 
 Map<Type, String> getRegisterdMappingsByType(){
   var map = new Map<Type, String>();
-  _tranTypesByType.forEach((k, v) => map[k] = v._key);
+  _tranCodecsByType.forEach((k, v) => map[k] = v._key);
   return map;
 }
 
 Map<String, Type> getRegisterdMappingsByKey(){
   var map = new Map<String, Type>();
-  _tranTypesByKey.forEach((k, v) => map[k] = v._type);
+  _tranCodecsByKey.forEach((k, v) => map[k] = v._type);
   return map;
 }
 
@@ -79,8 +79,8 @@ class Transmittable{
         parts.add(s.substring(start, end));
         start = i < 3 ? end + 1 : end;
       }
-      var tranType = _tranTypesByKey[parts[1]];
-      tran._internal[parts[0]] = tranType._fromStr(parts[3]);
+      var tranCodec = _tranCodecsByKey[parts[1]];
+      tran._internal[parts[0]] = tranCodec._decode(parts[3]);
     }
     return tran;
   }
@@ -123,12 +123,12 @@ class Transmittable{
 String _getTranSectionFromValue(dynamic v){
   //handle special/subtle types, datetime and duration are the only core types implemented so far that don't seem to have a problem
   Type type = v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Transmittable? Transmittable: reflect(v).type.reflectedType;
-  if(!_tranTypesByType.containsKey(type)){
-    throw new UnregisteredTranTypeError(type);
+  if(!_tranCodecsByType.containsKey(type)){
+    throw new UnregisteredTranCodecError(type);
   }
-  var tranType = _tranTypesByType[type];
-  var tranStr = tranType._toStr(v);
-  return '${tranType._key}:${tranStr.length}:$tranStr';
+  var tranCodec = _tranCodecsByType[type];
+  var tranStr = tranCodec._encode(v);
+  return '${tranCodec._key}:${tranStr.length}:$tranStr';
 }
 
 _checkTypeIsRegistered(dynamic v){
@@ -144,30 +144,30 @@ _checkTypeIsRegistered(dynamic v){
     });
   }else{
     Type type = reflect(v).type.reflectedType;
-    if(!_tranTypesByType.containsKey(type)){
-      throw new UnregisteredTranTypeError(type);
+    if(!_tranCodecsByType.containsKey(type)){
+      throw new UnregisteredTranCodecError(type);
     }
   }
 }
 
 
-final Map<String, _TranType> _tranTypesByKey = new Map<String, _TranType>();
-final Map<Type, _TranType> _tranTypesByType = new Map<Type, _TranType>();
-bool _coreTypesRegistered = false;
+final Map<String, _TranCodec> _tranCodecsByKey = new Map<String, _TranCodec>();
+final Map<Type, _TranCodec> _tranCodecsByType = new Map<Type, _TranCodec>();
+bool _coreCodecsRegistered = false;
 void registerCoreTypes(){
-  if(_coreTypesRegistered){return;}
-  _coreTypesRegistered = true;
-  registerTranType('n', num, (num n) => n.toString(), (String s) => num.parse(s));
-  registerTranType('s', String, (String s) => s, (String s) => s);
-  registerTranType('b', bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
-  registerTranType('l', List, (List l) => _processIterableToString(l), (String s) => _processStringBackToListsAndSets(new List(), s));
-  registerTranType('se', Set, (Set se) => _processIterableToString(se), (String s) => _processStringBackToListsAndSets(new Set(), s));
-  registerTranType('m', Map, (Map m) => _processMapToString(m), (String s) => _processStringBackToMap(s));
-  registerTranType('r', RegExp, (RegExp r){ var p = r.pattern; var c = r.isCaseSensitive? 't': 'f'; var m = r.isMultiLine? 't': 'f'; return '${p.length}:${p}$c$m'; }, (String s){ var start = s.indexOf(':') + 1; var end = start + num.parse(s.substring(0, start - 1)); var p = s.substring(start, end); var c = s.substring(end, end + 1) == 't'; var m = s.substring(end + 1, end + 2) == 't'; return new RegExp(p, caseSensitive: c, multiLine: m); });
-  registerTranType('d', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
-  registerTranType('du', Duration, (Duration dur) => '${dur.inMilliseconds}', (String s) => new Duration(milliseconds: num.parse(s)));
+  if(_coreCodecsRegistered){return;}
+  _coreCodecsRegistered = true;
+  registerTranCodec('n', num, (num n) => n.toString(), (String s) => num.parse(s));
+  registerTranCodec('s', String, (String s) => s, (String s) => s);
+  registerTranCodec('b', bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
+  registerTranCodec('l', List, (List l) => _processIterableToString(l), (String s) => _processStringBackToListsAndSets(new List(), s));
+  registerTranCodec('se', Set, (Set se) => _processIterableToString(se), (String s) => _processStringBackToListsAndSets(new Set(), s));
+  registerTranCodec('m', Map, (Map m) => _processMapToString(m), (String s) => _processStringBackToMap(s));
+  registerTranCodec('r', RegExp, (RegExp r){ var p = r.pattern; var c = r.isCaseSensitive? 't': 'f'; var m = r.isMultiLine? 't': 'f'; return '${p.length}:${p}$c$m'; }, (String s){ var start = s.indexOf(':') + 1; var end = start + num.parse(s.substring(0, start - 1)); var p = s.substring(start, end); var c = s.substring(end, end + 1) == 't'; var m = s.substring(end + 1, end + 2) == 't'; return new RegExp(p, caseSensitive: c, multiLine: m); });
+  registerTranCodec('d', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
+  registerTranCodec('du', Duration, (Duration dur) => '${dur.inMilliseconds}', (String s) => new Duration(milliseconds: num.parse(s)));
   //adding in Transmittable here too
-  registerTranType('t', Transmittable, (Transmittable t) => t.toTranString(), (String s) => new Transmittable.fromTranString(s));
+  registerTranCodec('t', Transmittable, (Transmittable t) => t.toTranString(), (String s) => new Transmittable.fromTranString(s));
 }
 
 dynamic _processStringBackToListsAndSets(dynamic col, String s){
@@ -181,8 +181,8 @@ dynamic _processStringBackToListsAndSets(dynamic col, String s){
       parts.add(s.substring(start, end));
       start = i < 2 ? end + 1 : end;
     }
-    var tranType = _tranTypesByKey[parts[0]];
-    col.add(tranType._fromStr(parts[2]));
+    var tranCodec = _tranCodecsByKey[parts[0]];
+    col.add(tranCodec._decode(parts[2]));
   }
   return col;
 }
@@ -206,11 +206,11 @@ Map<dynamic, dynamic> _processStringBackToMap(String s){
         parts.add(s.substring(start, end));
         start = j < 2 ? end + 1 : end;
       }
-      var tranType = _tranTypesByKey[parts[0]];
+      var tranCodec = _tranCodecsByKey[parts[0]];
       if(i == 0){
-        key = tranType._fromStr(parts[2]);
+        key = tranCodec._decode(parts[2]);
       }else{
-        map[key] = tranType._fromStr(parts[2]);
+        map[key] = tranCodec._decode(parts[2]);
       }
     }
   }

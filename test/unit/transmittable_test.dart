@@ -4,11 +4,11 @@ import 'package:transmittable/transmittable.dart';
 import 'package:unittest/unittest.dart';
 
 
-bool _registeredTransmittableTypes = false;
+bool _registeredTranCodecs = false;
 void _registerTransmittableTypes(){
-  if(_registeredTransmittableTypes){return;}
-  _registeredTransmittableTypes = true;
-  registerTranType('p', Person, (p)=>p.toTranString, (s)=>new Person.fromTranSring(s));
+  if(_registeredTranCodecs){return;}
+  _registeredTranCodecs = true;
+  registerTranCodec('p', Person, (p)=>p.toTranString, (s)=>new Person.fromTranSring(s));
 }
 
 
@@ -169,7 +169,7 @@ void main(){
 
     test('doesnt support unregistered types', (){
       var tran = new Transmittable();
-      expect(() => tran.unreg = new UnRegisteredType(), throwsA(new isInstanceOf<UnregisteredTranTypeError>()));
+      expect(() => tran.unreg = new UnRegisteredType(), throwsA(new isInstanceOf<UnregisteredTranCodecError>()));
     });
 
   });

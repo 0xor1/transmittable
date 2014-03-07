@@ -4,8 +4,8 @@
 
 part of Transmittable;
 
-class UnregisteredTranTypeError{
+class UnregisteredTranCodecError{
   String get message => 'Type "$type" has not been registered with registerTranType().';
   final Type type;
-  const UnregisteredTranTypeError(Type this.type);
+  const UnregisteredTranCodecError(Type this.type);
 }
