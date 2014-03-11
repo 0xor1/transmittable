@@ -136,6 +136,8 @@ bool _coreCodecsRegistered = false;
 void registerCoreTypes(){
   if(_coreCodecsRegistered){return;}
   _coreCodecsRegistered = true;
+  registerTranCodec('i', int, (int i) => i.toString(), (String s) => int.parse(s));
+  registerTranCodec('f', double, (double f) => f.toString(), (String s) => double.parse(s));
   registerTranCodec('n', num, (num n) => n.toString(), (String s) => num.parse(s));
   registerTranCodec('s', String, (String s) => s, (String s) => s);
   registerTranCodec('b', bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
