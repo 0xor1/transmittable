@@ -100,7 +100,6 @@ class Transmittable{
       }
       return null;
     }else if(inv.isSetter && positionalArgs == 1){
-      _checkTypeIsRegistered(inv.positionalArguments[0]);
       property = property.replaceAll("=", "");
       _internal[property] = inv.positionalArguments[0];
       return _internal[property];
@@ -130,26 +129,6 @@ String _getTranSectionFromValue(dynamic v){
   var tranStr = tranCodec._encode(v);
   return '${tranCodec._key}:${tranStr.length}:$tranStr';
 }
-
-_checkTypeIsRegistered(dynamic v){
-  if(v is num || v is bool || v is String || v is RegExp){
-    return;
-  }else if(v is List || v is Set){
-    v.forEach((o) => _checkTypeIsRegistered(o));
-    return;
-  } else if(v is Map){
-    v.forEach((k, v){
-      _checkTypeIsRegistered(k);
-      _checkTypeIsRegistered(v);
-    });
-  }else{
-    Type type = reflect(v).type.reflectedType;
-    if(!_tranCodecsByType.containsKey(type)){
-      throw new UnregisteredTranCodecError(type);
-    }
-  }
-}
-
 
 final Map<String, _TranCodec> _tranCodecsByKey = new Map<String, _TranCodec>();
 final Map<Type, _TranCodec> _tranCodecsByType = new Map<Type, _TranCodec>();

@@ -169,7 +169,8 @@ void main(){
 
     test('doesnt support unregistered types', (){
       var tran = new Transmittable();
-      expect(() => tran.unreg = new UnRegisteredType(), throwsA(new isInstanceOf<UnregisteredTranCodecError>()));
+      tran.unreg = new UnRegisteredType();
+      expect(() => tran.toTranString(), throwsA(new isInstanceOf<UnregisteredTranCodecError>()));
     });
 
   });
