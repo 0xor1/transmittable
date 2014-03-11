@@ -121,7 +121,7 @@ class Transmittable{
 
 String _getTranSectionFromValue(dynamic v){
   //handle special/subtle types, datetime and duration are the only core types implemented so far that don't seem to have a problem
-  Type type = v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Transmittable? Transmittable: reflect(v).type.reflectedType;
+  Type type = v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Transmittable? Transmittable: v is Type? Type: reflect(v).type.reflectedType;
   if(!_tranCodecsByType.containsKey(type)){
     throw new UnregisteredTranCodecError(type);
   }
@@ -143,10 +143,11 @@ void registerCoreTypes(){
   registerTranCodec('se', Set, (Set se) => _processIterableToString(se), (String s) => _processStringBackToListsAndSets(new Set(), s));
   registerTranCodec('m', Map, (Map m) => _processMapToString(m), (String s) => _processStringBackToMap(s));
   registerTranCodec('r', RegExp, (RegExp r){ var p = r.pattern; var c = r.isCaseSensitive? 't': 'f'; var m = r.isMultiLine? 't': 'f'; return '${p.length}:${p}$c$m'; }, (String s){ var start = s.indexOf(':') + 1; var end = start + num.parse(s.substring(0, start - 1)); var p = s.substring(start, end); var c = s.substring(end, end + 1) == 't'; var m = s.substring(end + 1, end + 2) == 't'; return new RegExp(p, caseSensitive: c, multiLine: m); });
+  registerTranCodec('t', Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
   registerTranCodec('d', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
   registerTranCodec('du', Duration, (Duration dur) => '${dur.inMilliseconds}', (String s) => new Duration(milliseconds: num.parse(s)));
   //adding in Transmittable here too
-  registerTranCodec('t', Transmittable, (Transmittable t) => t.toTranString(), (String s) => new Transmittable.fromTranString(s));
+  registerTranCodec('tr', Transmittable, (Transmittable t) => t.toTranString(), (String s) => new Transmittable.fromTranString(s));
 }
 
 dynamic _processStringBackToListsAndSets(dynamic col, String s){
@@ -200,4 +201,12 @@ String _processMapToString(Map<dynamic, dynamic> m){
   var strB = new StringBuffer();
   m.forEach((k, v){ strB.write(_getTranSectionFromValue(k)); strB.write(_getTranSectionFromValue(v)); });
   return strB.toString();
+}
+
+String _processTypeToString(Type t){
+  if(_tranCodecsByType.containsKey(t)){
+    return _tranCodecsByType[t]._key;
+  }else{
+    throw new UnregisteredTranCodecError(t);
+  }
 }

@@ -162,9 +162,18 @@ void main(){
       var tran = new Transmittable()
       ..tran = (new Transmittable()..str = 'hi');
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('tran:t:10:str:s:2:hi'));
+      expect(tranStr, equals('tran:tr:10:str:s:2:hi'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.tran.str, equals('hi'));
+    });
+
+    test('supports types', (){
+      var tran = new Transmittable()
+      ..type = String;
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('type:t:1:s'));
+      var reTran = new Transmittable.fromTranString(tranStr);
+      expect(reTran.type, equals(String));
     });
 
     test('doesnt support unregistered types', (){
