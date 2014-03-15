@@ -121,7 +121,7 @@ class Transmittable{
 
 String _getTranSectionFromValue(dynamic v){
   //handle special/subtle types, datetime and duration are the only core types implemented so far that don't seem to have a problem
-  Type type = v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Transmittable? Transmittable: v is Type? Type: reflect(v).type.reflectedType;
+  Type type = v == null? null: v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Transmittable? Transmittable: v is Type? Type: reflect(v).type.reflectedType;
   if(!_tranCodecsByType.containsKey(type)){
     throw new UnregisteredTranCodecError(type);
   }
@@ -136,6 +136,7 @@ bool _coreCodecsRegistered = false;
 void registerCoreTypes(){
   if(_coreCodecsRegistered){return;}
   _coreCodecsRegistered = true;
+  registerTranCodec('_', null, (o)=> '', (s) => null);
   registerTranCodec('i', int, (int i) => i.toString(), (String s) => int.parse(s));
   registerTranCodec('f', double, (double f) => f.toString(), (String s) => double.parse(s));
   registerTranCodec('n', num, (num n) => n.toString(), (String s) => num.parse(s));

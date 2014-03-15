@@ -43,6 +43,15 @@ class UnRegisteredType{}
 void main(){
   group('Transmittable', (){
 
+    test('supports null',(){
+      var tran = new Transmittable()
+      ..aNull = null;
+      var tranStr = tran.toTranString();
+      expect(tranStr, equals('aNull:_:0:'));
+      var reTran = new Transmittable.fromTranString(tranStr);
+      expect(reTran.aNull, equals(null));
+    });
+
     test('supports numbers',(){
       var tran = new Transmittable()
       ..pos = 23
