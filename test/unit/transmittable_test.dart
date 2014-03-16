@@ -37,7 +37,7 @@ class Person{
 }
 
 
-class UnRegisteredType{}
+class UnregisteredType{}
 
 
 void main(){
@@ -187,8 +187,16 @@ void main(){
 
     test('doesnt support unregistered types', (){
       var tran = new Transmittable();
-      tran.unreg = new UnRegisteredType();
+      tran.unreg = new UnregisteredType();
       expect(() => tran.toTranString(), throwsA(new isInstanceOf<UnregisteredTranCodecError>()));
+    });
+
+    test('supports pre-processing of values at encode time', (){
+      var tran = new Transmittable()
+      ..unreg = new UnregisteredType()
+      ..aNum = 1;
+      var tranStr = tran.toTranString((v) => v is UnregisteredType? 'foundAnUnregisteredType!!': v);
+      expect(tranStr, 'unreg:s:25:foundAnUnregisteredType!!aNum:n:1:1');
     });
 
   });

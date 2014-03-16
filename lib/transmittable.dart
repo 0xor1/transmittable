@@ -44,6 +44,8 @@ typedef String TranEncode<T>(T obj);
  */
 typedef T TranDecode<T>(String str);
 
+typedef dynamic ValuePreProcessor(dynamic value);
+
 Map<Type, String> getRegisterdMappingsByType(){
   var map = new Map<Type, String>();
   _tranCodecsByType.forEach((k, v) => map[k] = v._key);
@@ -108,18 +110,19 @@ class Transmittable{
     super.noSuchMethod(inv);
   }
 
-  String toTranString(){
+  String toTranString([ValuePreProcessor vpp = null]){
     var strB = new StringBuffer();
     var keys = _internal.keys;
     keys.forEach((k){
       var v = _internal[k];
-      strB.write('$k:${_getTranSectionFromValue(v)}');
+      strB.write('$k:${_getTranSectionFromValue(v, vpp)}');
     });
     return strB.toString();
   }
 }
 
-String _getTranSectionFromValue(dynamic v){
+String _getTranSectionFromValue(dynamic v, [ValuePreProcessor vpp = null]){
+  if(vpp != null){ v = vpp(v); }
   //handle special/subtle types, datetime and duration are the only core types implemented so far that don't seem to have a problem
   Type type = v == null? null: v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Transmittable? Transmittable: v is Type? Type: reflect(v).type.reflectedType;
   if(!_tranCodecsByType.containsKey(type)){

@@ -1,5 +1,5 @@
 name: transmittable
-version: 0.0.5
+version: 0.0.6
 author: Daniel Robinson <daniel.robinson.dart@gmail.com>
 description: Provides a simple means of registering Types with string keys allowing Types to be transparently serialized into a Json-like string. These types can be used on a shallow transmittable object to transfer objects with type information over http requests, so they can be fully deserialized on the receiving end to the correct types.
 homepage: http://github.com/0xor1/transmittable
