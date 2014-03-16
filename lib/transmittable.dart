@@ -142,10 +142,10 @@ void registerCoreTypes(){
   registerTranCodec('n', num, (num n) => n.toString(), (String s) => num.parse(s));
   registerTranCodec('s', String, (String s) => s, (String s) => s);
   registerTranCodec('b', bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
-  registerTranCodec('l', List, (List l) => _processIterableToString(l), (String s) => _processStringBackToListsAndSets(new List(), s));
-  registerTranCodec('se', Set, (Set se) => _processIterableToString(se), (String s) => _processStringBackToListsAndSets(new Set(), s));
-  registerTranCodec('m', Map, (Map m) => _processMapToString(m), (String s) => _processStringBackToMap(s));
-  registerTranCodec('r', RegExp, (RegExp r){ var p = r.pattern; var c = r.isCaseSensitive? 't': 'f'; var m = r.isMultiLine? 't': 'f'; return '${p.length}:${p}$c$m'; }, (String s){ var start = s.indexOf(':') + 1; var end = start + num.parse(s.substring(0, start - 1)); var p = s.substring(start, end); var c = s.substring(end, end + 1) == 't'; var m = s.substring(end + 1, end + 2) == 't'; return new RegExp(p, caseSensitive: c, multiLine: m); });
+  registerTranCodec('l', List, _processIterableToString, (String s) => _processStringBackToListOrSet(new List(), s));
+  registerTranCodec('se', Set, _processIterableToString, (String s) => _processStringBackToListOrSet(new Set(), s));
+  registerTranCodec('m', Map, _processMapToString, _processStringBackToMap);
+  registerTranCodec('r', RegExp, _processRegExpToString, _processStringBackToRegExp);
   registerTranCodec('t', Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
   registerTranCodec('d', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
   registerTranCodec('du', Duration, (Duration dur) => '${dur.inMilliseconds}', (String s) => new Duration(milliseconds: num.parse(s)));
@@ -153,7 +153,7 @@ void registerCoreTypes(){
   registerTranCodec('tr', Transmittable, (Transmittable t) => t.toTranString(), (String s) => new Transmittable.fromTranString(s));
 }
 
-dynamic _processStringBackToListsAndSets(dynamic col, String s){
+dynamic _processStringBackToListOrSet(dynamic col, String s){
   if(!(col is Set) && !(col is List)){ throw 'Expecting either List or Set only'; }
   int start = 0;
   while(start < s.length){
@@ -212,4 +212,20 @@ String _processTypeToString(Type t){
   }else{
     throw new UnregisteredTranCodecError(t);
   }
+}
+
+String _processRegExpToString(RegExp r){
+  var p = r.pattern;
+  var c = r.isCaseSensitive? 't': 'f';
+  var m = r.isMultiLine? 't': 'f';
+  return '${p.length}:${p}$c$m';
+}
+
+RegExp _processStringBackToRegExp(String s){
+  var start = s.indexOf(':') + 1;
+  var end = start + num.parse(s.substring(0, start - 1));
+  var p = s.substring(start, end);
+  var c = s.substring(end, end + 1) == 't';
+  var m = s.substring(end + 1, end + 2) == 't';
+  return new RegExp(p, caseSensitive: c, multiLine: m);
 }
