@@ -8,19 +8,15 @@ connections using shallow transmittable objects.
 Extend off of **Transmittable** to make an object transmittable accross a http 
 connection, then explicitly implement an interface for this object, but do not 
 implement any of the interfaces getters/setters which you would like to transmit.
-Then ensure the object implements the pattern of constructors in the following example.
+It is a requirement that classes extending off **Transmittable** implement a 
+default constructor, meaning one which takes no arguments.
 
 ```
+class Cat extends Transmittable implements ICat{}
 abstract class ICat{
   String name;
   int age;
 }
-
-class Cat extends Transmittable implements ICat{
-  Cat();
-  factory Cat.fromTranString(str) => new Transmittable.fromTranString(str, new Cat());
-}
-
 
 void main(){
   Cat c1 = new Cat()
@@ -30,7 +26,8 @@ void main(){
   
   // send down http connection and then deserialise back into the cat object
   
-  Cat c2 = new Cat.fromTranString(tranStr);
+  Cat c2 = new Transmittable.fromTranString(tranStr);
+  print(c2 is Cat) // true
   print(c2.name); // felix
   print(c2.age); // 3
 }
@@ -50,7 +47,14 @@ registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode)
 typedef String TranEncode<T>(T obj);
 typedef T TranDecode<T>(String str);
 ```
-remember this method call must be made on both the client side and the server side.
+Remember this method call must be made on both the client side and the server
+side with the same arguments. This is usually bes achieved by both server and
+client side libraries referencing a common interface library which contains a
+method wrapping all your required calls to **registerTranCodec**.
+
+Additionally for **Transmittable** to be able to recreate an actual instance of
+your extended type you must register that type too with **registerTranCodec**
+but you can pass in null for both function arguments.
 
 ##Issues to be aware of
 

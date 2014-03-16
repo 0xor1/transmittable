@@ -20,6 +20,10 @@ const String TRAN_DELIMITER = ':';
 const String TD = TRAN_DELIMITER;
 
 /**
+ * Register a [tranSubtype]
+ */
+void registerTranSubtype(String key, Type subtype) => registerTranCodec(key, subtype, null, null);
+/**
  * Registers a [type] with a given [key] to make it transmittable.
  */
 void registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode){
@@ -70,12 +74,11 @@ class Transmittable{
     registerCoreTypes();
   }
 
-  factory Transmittable.fromTranString(String s, [Transmittable tran]){
+  factory Transmittable.fromTranString(String s){
     registerCoreTypes();
-    if(tran == null){
-      tran = new Transmittable();
-    }
-    int start = 0;
+    var typeKey = s.substring(0, s.indexOf(TD));
+    var tran = reflectClass(_tranCodecsByKey[typeKey]._type).newInstance(const Symbol(''), new List()).reflectee;
+    int start = typeKey.length + 1;
     while(start < s.length){
       int end;
       List<String> parts = new List<String>(); //0 is name, 1 is key, 2 is data length, 3 is data
@@ -116,6 +119,11 @@ class Transmittable{
   String toTranString([ValuePreProcessor vpp = null]){
     var strB = new StringBuffer();
     var keys = _internal.keys;
+    var selfType = reflect(this).type.reflectedType;
+    if(!_tranCodecsByType.containsKey(selfType)){
+      throw new UnregisteredTranCodecError(selfType);
+    }
+    strB.write('${_tranCodecsByType[selfType]._key}$TD');
     keys.forEach((k){
       var v = _internal[k];
       strB.write('$k$TD${_getTranSectionFromValue(v, vpp)}');
@@ -143,8 +151,6 @@ void registerCoreTypes(){
   if(_coreCodecsRegistered){return;}
   _coreCodecsRegistered = true;
   registerTranCodec('_', null, (o)=> '', (s) => null);
-  registerTranCodec('i', int, (int i) => i.toString(), (String s) => int.parse(s));
-  registerTranCodec('f', double, (double f) => f.toString(), (String s) => double.parse(s));
   registerTranCodec('n', num, (num n) => n.toString(), (String s) => num.parse(s));
   registerTranCodec('s', String, (String s) => s, (String s) => s);
   registerTranCodec('b', bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
@@ -155,8 +161,10 @@ void registerCoreTypes(){
   registerTranCodec('t', Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
   registerTranCodec('d', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
   registerTranCodec('du', Duration, (Duration dur) => '${dur.inMilliseconds}', (String s) => new Duration(milliseconds: num.parse(s)));
-  //adding in Transmittable here too
   registerTranCodec('tr', Transmittable, (Transmittable t) => t.toTranString(), (String s) => new Transmittable.fromTranString(s));
+
+  registerTranSubtype('i', int);
+  registerTranSubtype('f', double);
 }
 
 dynamic _processStringBackToListOrSet(dynamic col, String s){

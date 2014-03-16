@@ -9,8 +9,10 @@ void _registerTransmittableTypes(){
   if(_registeredTranCodecs){return;}
   _registeredTranCodecs = true;
   registerTranCodec('p', Person, (p)=>p.toTranString, (s)=>new Person.fromTranSring(s));
+  registerTranSubtype('cat', Cat);
 }
 
+class UnregisteredType{}
 
 class Person{
 
@@ -36,9 +38,11 @@ class Person{
   int get hashCode => socialSecurity.hashCode;
 }
 
-
-class UnregisteredType{}
-
+class Cat extends Transmittable implements ICat{}
+abstract class ICat{
+  String name;
+  int age;
+}
 
 void main(){
   group('Transmittable', (){
@@ -47,7 +51,7 @@ void main(){
       var tran = new Transmittable()
       ..aNull = null;
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('aNull:_:0:'));
+      expect(tranStr, equals('tr:aNull:_:0:'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.aNull, equals(null));
     });
@@ -57,7 +61,7 @@ void main(){
       ..pos = 23
       ..neg = -3;
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('pos:n:2:23neg:n:2:-3'));
+      expect(tranStr, equals('tr:pos:n:2:23neg:n:2:-3'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.pos, equals(23));
       expect(reTran.neg, equals(-3));
@@ -68,7 +72,7 @@ void main(){
       ..t = true
       ..f = false;
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('t:b:1:tf:b:1:f'));
+      expect(tranStr, equals('tr:t:b:1:tf:b:1:f'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.t, equals(true));
       expect(reTran.f, equals(false));
@@ -79,7 +83,7 @@ void main(){
       ..str1 = 'Hello World'
       ..str2 = 'Hi';
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('str1:s:11:Hello Worldstr2:s:2:Hi'));
+      expect(tranStr, equals('tr:str1:s:11:Hello Worldstr2:s:2:Hi'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.str1, equals('Hello World'));
       expect(reTran.str2, equals('Hi'));
@@ -89,7 +93,7 @@ void main(){
       var tran = new Transmittable();
       var dt = tran.datetime = new DateTime.now();
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('datetime:d:23:${dt.toString()}'));
+      expect(tranStr, equals('tr:datetime:d:23:${dt.toString()}'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.datetime, equals(dt));
     });
@@ -98,7 +102,7 @@ void main(){
       var tran = new Transmittable();
       var dur = tran.duration = new Duration(days:23, seconds: 4, milliseconds: 456);
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('duration:du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
+      expect(tranStr, equals('tr:duration:du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.duration, equals(dur));
     });
@@ -109,7 +113,7 @@ void main(){
       var dur = new Duration(days:147, seconds: 78, milliseconds: 2);
       tran.list = [12, 'Hi', true, dt, dur];
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('list:l:62:n:2:12s:2:Hib:1:td:23:${dt.toString()}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
+      expect(tranStr, equals('tr:list:l:62:n:2:12s:2:Hib:1:td:23:${dt.toString()}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.list[0], equals(12));
       expect(reTran.list[1], equals('Hi'));
@@ -125,7 +129,7 @@ void main(){
       var contents = [12, 'Hi', true, dt, dur];
       tran.set = new Set()..addAll(contents);
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('set:se:62:n:2:12s:2:Hib:1:td:23:${dt.toString()}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
+      expect(tranStr, equals('tr:set:se:62:n:2:12s:2:Hib:1:td:23:${dt.toString()}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.set.containsAll(contents), equals(true));
     });
@@ -141,7 +145,7 @@ void main(){
       ..[dt] = dt
       ..[dur] = dur;
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('map:m:124:n:2:12n:2:12s:2:His:2:Hib:1:tb:1:fd:23:${dt.toString()}d:23:${dt.toString()}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
+      expect(tranStr, equals('tr:map:m:124:n:2:12n:2:12s:2:His:2:Hib:1:tb:1:fd:23:${dt.toString()}d:23:${dt.toString()}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}du:${dur.inMilliseconds.toString().length}:${dur.inMilliseconds}'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.map[12], equals(12));
       expect(reTran.map['Hi'], equals('Hi'));
@@ -154,14 +158,14 @@ void main(){
       var tran = new Transmittable();
       tran.regexp = new RegExp(r'^[a-z]\n', caseSensitive: false, multiLine: true);
       var tranStr = tran.toTranString();
-      expect(tranStr, equals(r'regexp:r:12:8:^[a-z]\nft'));
+      expect(tranStr, equals(r'tr:regexp:r:12:8:^[a-z]\nft'));
     });
 
     test('supports custom types',(){
       var tran = new Transmittable();
       var person = tran.person = new Person('Joe Bloggs', 23);
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('person:p:15:Joe Bloggs,23,0'));
+      expect(tranStr, equals('tr:person:p:15:Joe Bloggs,23,0'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.person, equals(person));
 
@@ -171,18 +175,22 @@ void main(){
       var tran = new Transmittable()
       ..tran = (new Transmittable()..str = 'hi');
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('tran:tr:10:str:s:2:hi'));
+      expect(tranStr, equals('tr:tran:tr:13:tr:str:s:2:hi'));
       var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.tran.str, equals('hi'));
     });
 
     test('supports types', (){
       var tran = new Transmittable()
-      ..type = String;
+      ..string = String
+      ..int = int
+      ..double = double;
       var tranStr = tran.toTranString();
-      expect(tranStr, equals('type:t:1:s'));
+      expect(tranStr, equals('tr:string:t:1:sint:t:1:idouble:t:1:f'));
       var reTran = new Transmittable.fromTranString(tranStr);
-      expect(reTran.type, equals(String));
+      expect(reTran.string, equals(String));
+      expect(reTran.int, equals(int));
+      expect(reTran.double, equals(double));
     });
 
     test('doesnt support unregistered types', (){
@@ -196,7 +204,17 @@ void main(){
       ..unreg = new UnregisteredType()
       ..aNum = 1;
       var tranStr = tran.toTranString((v) => v is UnregisteredType? 'foundAnUnregisteredType!!': v);
-      expect(tranStr, 'unreg:s:25:foundAnUnregisteredType!!aNum:n:1:1');
+      expect(tranStr, 'tr:unreg:s:25:foundAnUnregisteredType!!aNum:n:1:1');
+    });
+
+    test('supports dynamic Transmittable type creation', (){
+      var cat = new Cat()
+      ..name = 'Felix'
+      ..age = 3;
+      var tranStr = cat.toTranString();
+      expect(tranStr, 'cat:name:s:5:Felixage:n:1:3');
+      var reCat = new Transmittable.fromTranString(tranStr);
+      expect(reCat is Cat, true);
     });
 
   });
