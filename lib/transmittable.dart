@@ -27,7 +27,7 @@ void registerTranSubtype(String key, Type subtype) => registerTranCodec(key, sub
  * Registers a [type] with a given [key] to make it transmittable.
  */
 void registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode){
-  registerCoreTypes();
+  _registerCoreTypes();
   if(key.contains(TD)){
     throw new InvalidTranKeyError(key);
   }else if(_tranCodecsByKey.containsKey(key)){
@@ -71,11 +71,11 @@ class Transmittable{
   final Map<String, dynamic> _internal = new Map<String, dynamic>();
 
   Transmittable(){
-    registerCoreTypes();
+    _registerCoreTypes();
   }
 
   factory Transmittable.fromTranString(String s){
-    registerCoreTypes();
+    _registerCoreTypes();
     var typeKey = s.substring(0, s.indexOf(TD));
     var tran = reflectClass(_tranCodecsByKey[typeKey]._type).newInstance(const Symbol(''), new List()).reflectee;
     int start = typeKey.length + 1;
@@ -146,10 +146,10 @@ String _getTranSectionFromValue(dynamic v, [ValuePreProcessor vpp = null]){
 
 final Map<String, _TranCodec> _tranCodecsByKey = new Map<String, _TranCodec>();
 final Map<Type, _TranCodec> _tranCodecsByType = new Map<Type, _TranCodec>();
-bool _coreCodecsRegistered = false;
-void registerCoreTypes(){
-  if(_coreCodecsRegistered){return;}
-  _coreCodecsRegistered = true;
+bool _coreTypesRegistered = false;
+void _registerCoreTypes(){
+  if(_coreTypesRegistered){return;}
+  _coreTypesRegistered = true;
   registerTranCodec('_', null, (o)=> '', (s) => null);
   registerTranCodec('n', num, (num n) => n.toString(), (String s) => num.parse(s));
   registerTranCodec('s', String, (String s) => s, (String s) => s);
