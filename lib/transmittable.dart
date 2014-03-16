@@ -16,12 +16,15 @@ part 'duplicate_tran_type_error.dart';
 part 'unregistered_tran_codec_error.dart';
 part 'invalid_tran_key_error.dart';
 
+const String TRAN_DELIMITER = ':';
+const String TD = TRAN_DELIMITER;
+
 /**
  * Registers a [type] with a given [key] to make it transmittable.
  */
 void registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode){
   registerCoreTypes();
-  if(key.contains(new RegExp(r':'))){
+  if(key.contains(TD)){
     throw new InvalidTranKeyError(key);
   }else if(_tranCodecsByKey.containsKey(key)){
     throw new DuplicateTranKeyError(key, type);
@@ -77,7 +80,7 @@ class Transmittable{
       int end;
       List<String> parts = new List<String>(); //0 is name, 1 is key, 2 is data length, 3 is data
       for(var i = 0; i < 4; i++){
-        end = i < 3 ? s.indexOf(':', start) : start + num.parse(parts[2]);
+        end = i < 3 ? s.indexOf(TD, start) : start + num.parse(parts[2]);
         parts.add(s.substring(start, end));
         start = i < 3 ? end + 1 : end;
       }
@@ -115,7 +118,7 @@ class Transmittable{
     var keys = _internal.keys;
     keys.forEach((k){
       var v = _internal[k];
-      strB.write('$k:${_getTranSectionFromValue(v, vpp)}');
+      strB.write('$k$TD${_getTranSectionFromValue(v, vpp)}');
     });
     return strB.toString();
   }
@@ -130,7 +133,7 @@ String _getTranSectionFromValue(dynamic v, [ValuePreProcessor vpp = null]){
   }
   var tranCodec = _tranCodecsByType[type];
   var tranStr = tranCodec._encode(v);
-  return '${tranCodec._key}:${tranStr.length}:$tranStr';
+  return '${tranCodec._key}$TD${tranStr.length}$TD$tranStr';
 }
 
 final Map<String, _TranCodec> _tranCodecsByKey = new Map<String, _TranCodec>();
@@ -163,7 +166,7 @@ dynamic _processStringBackToListOrSet(dynamic col, String s){
     int end;
     List<String> parts = new List<String>(); //0 is key, 1 is data length, 2 is data
     for(var i = 0; i < 3; i++){
-      end = i < 2 ? s.indexOf(':', start) : start + num.parse(parts[1]);
+      end = i < 2 ? s.indexOf(TD, start) : start + num.parse(parts[1]);
       parts.add(s.substring(start, end));
       start = i < 2 ? end + 1 : end;
     }
@@ -188,7 +191,7 @@ Map<dynamic, dynamic> _processStringBackToMap(String s){
     for(var i = 0; i < 2; i++){
       List<String> parts = new List<String>(); //0 is key, 1 is data length, 2 is data
       for(var j = 0; j < 3; j++){
-        end = j < 2 ? s.indexOf(':', start) : start + num.parse(parts[1]);
+        end = j < 2 ? s.indexOf(TD, start) : start + num.parse(parts[1]);
         parts.add(s.substring(start, end));
         start = j < 2 ? end + 1 : end;
       }
@@ -221,11 +224,11 @@ String _processRegExpToString(RegExp r){
   var p = r.pattern;
   var c = r.isCaseSensitive? 't': 'f';
   var m = r.isMultiLine? 't': 'f';
-  return '${p.length}:${p}$c$m';
+  return '${p.length}$TD${p}$c$m';
 }
 
 RegExp _processStringBackToRegExp(String s){
-  var start = s.indexOf(':') + 1;
+  var start = s.indexOf(TD) + 1;
   var end = start + num.parse(s.substring(0, start - 1));
   var p = s.substring(start, end);
   var c = s.substring(end, end + 1) == 't';
