@@ -130,6 +130,9 @@ class Transmittable{
     });
     return strB.toString();
   }
+
+  void forEach(f) => _internal.forEach(f);
+  void clear() => _internal.clear();
 }
 
 String _getTranSectionFromValue(dynamic v, [ValuePreProcessor vpp = null]){
