@@ -22,7 +22,10 @@ const String TD = TRAN_DELIMITER;
 /**
  * Register a [tranSubtype]
  */
-void registerTranSubtype(String key, Type subtype) => registerTranCodec(key, subtype, null, null);
+void registerTranSubtype(String key, Type subtype){
+  ClassMirror cm = reflectClass(subtype);
+  registerTranCodec(key, subtype, _processTranToString, (String s) => _processStringBackToTran(cm.newInstance(const Symbol(''), new List<dynamic>()).reflectee, s));
+}
 /**
  * Registers a [type] with a given [key] to make it transmittable.
  */
@@ -51,7 +54,7 @@ typedef String TranEncode<T>(T obj);
  */
 typedef T TranDecode<T>(String str);
 
-typedef dynamic ValuePreProcessor(dynamic value);
+typedef dynamic ValueProcessor(dynamic value);
 
 Map<Type, String> getRegisterdMappingsByType(){
   var map = new Map<Type, String>();
@@ -68,29 +71,25 @@ Map<String, Type> getRegisterdMappingsByKey(){
 @proxy
 class Transmittable{
 
-  final Map<String, dynamic> _internal = new Map<String, dynamic>();
+  Map<String, dynamic> _internal = new Map<String, dynamic>();
 
   Transmittable(){
     _registerCoreTypes();
   }
 
-  factory Transmittable.fromTranString(String s){
+  factory Transmittable.fromTranString(String s, [ValueProcessor postProcessor = null]){
     _registerCoreTypes();
-    var typeKey = s.substring(0, s.indexOf(TD));
-    var tran = reflectClass(_tranCodecsByKey[typeKey]._type).newInstance(const Symbol(''), new List()).reflectee;
-    int start = typeKey.length + 1;
-    while(start < s.length){
-      int end;
-      List<String> parts = new List<String>(); //0 is name, 1 is key, 2 is data length, 3 is data
-      for(var i = 0; i < 4; i++){
-        end = i < 3 ? s.indexOf(TD, start) : start + num.parse(parts[2]);
-        parts.add(s.substring(start, end));
-        start = i < 3 ? end + 1 : end;
-      }
-      var tranCodec = _tranCodecsByKey[parts[1]];
-      tran._internal[parts[0]] = tranCodec._decode(parts[3]);
-    }
-    return tran;
+    _valueProcessor = postProcessor;
+    var v = _getValueFromTranSection(s);
+    _valueProcessor = null;
+    return v;
+  }
+
+  String toTranString([ValueProcessor preProcessor = null]){
+    _valueProcessor = preProcessor;
+    var s = _getTranSectionFromValue(this);
+    _valueProcessor = null;
+    return s;
   }
 
   noSuchMethod(Invocation inv){
@@ -116,35 +115,33 @@ class Transmittable{
     super.noSuchMethod(inv);
   }
 
-  String toTranString([ValuePreProcessor vpp = null]){
-    var strB = new StringBuffer();
-    var keys = _internal.keys;
-    var selfType = reflect(this).type.reflectedType;
-    if(!_tranCodecsByType.containsKey(selfType)){
-      throw new UnregisteredTranCodecError(selfType);
-    }
-    strB.write('${_tranCodecsByType[selfType]._key}$TD');
-    keys.forEach((k){
-      var v = _internal[k];
-      strB.write('$k$TD${_getTranSectionFromValue(v, vpp)}');
-    });
-    return strB.toString();
-  }
-
-  void forEach(f) => _internal.forEach(f);
+  void forEach(void f(k, v)) => _internal.forEach(f);
   void clear() => _internal.clear();
 }
 
-String _getTranSectionFromValue(dynamic v, [ValuePreProcessor vpp = null]){
-  if(vpp != null){ v = vpp(v); }
+final Set<dynamic> _values = new Set<dynamic>();
+
+ValueProcessor _valueProcessor = null;
+
+String _getTranSectionFromValue(dynamic v){
+  if(_valueProcessor != null){ v = _valueProcessor(v); }
   //handle special/subtle types, datetime and duration are the only core types implemented so far that don't seem to have a problem
-  Type type = v == null? null: v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Transmittable? Transmittable: v is Type? Type: reflect(v).type.reflectedType;
+  Type type = v == null? null: v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Type? Type: reflect(v).type.reflectedType;
   if(!_tranCodecsByType.containsKey(type)){
     throw new UnregisteredTranCodecError(type);
   }
   var tranCodec = _tranCodecsByType[type];
   var tranStr = tranCodec._encode(v);
   return '${tranCodec._key}$TD${tranStr.length}$TD$tranStr';
+}
+
+dynamic _getValueFromTranSection(String s){
+  var idx1 = s.indexOf(TD);
+  var idx2 = s.indexOf(TD, idx1 + 1);
+  var key = s.substring(0, idx1);
+  var v = _tranCodecsByKey[key]._decode(s.substring(idx2 + 1));
+  if(_valueProcessor != null){ v = _valueProcessor(v); }
+  return v;
 }
 
 final Map<String, _TranCodec> _tranCodecsByKey = new Map<String, _TranCodec>();
@@ -155,6 +152,8 @@ void _registerCoreTypes(){
   _coreTypesRegistered = true;
   registerTranCodec('_', null, (o)=> '', (s) => null);
   registerTranCodec('n', num, (num n) => n.toString(), (String s) => num.parse(s));
+  registerTranCodec('i', int, (int i) => i.toString(), (String s) => int.parse(s));
+  registerTranCodec('f', double, (double f) => f.toString(), (String s) => double.parse(s));
   registerTranCodec('s', String, (String s) => s, (String s) => s);
   registerTranCodec('b', bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
   registerTranCodec('l', List, _processIterableToString, (String s) => _processStringBackToListOrSet(new List(), s));
@@ -164,10 +163,7 @@ void _registerCoreTypes(){
   registerTranCodec('t', Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
   registerTranCodec('d', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
   registerTranCodec('du', Duration, (Duration dur) => '${dur.inMilliseconds}', (String s) => new Duration(milliseconds: num.parse(s)));
-  registerTranCodec('tr', Transmittable, (Transmittable t) => t.toTranString(), (String s) => new Transmittable.fromTranString(s));
-
-  registerTranSubtype('i', int);
-  registerTranSubtype('f', double);
+  registerTranSubtype('tr', Transmittable);
 }
 
 dynamic _processStringBackToListOrSet(dynamic col, String s){
@@ -221,6 +217,14 @@ String _processMapToString(Map<dynamic, dynamic> m){
   var strB = new StringBuffer();
   m.forEach((k, v){ strB.write(_getTranSectionFromValue(k)); strB.write(_getTranSectionFromValue(v)); });
   return strB.toString();
+}
+
+String _processTranToString(Transmittable t){
+  return _processMapToString(t._internal);
+}
+
+Transmittable _processStringBackToTran(Transmittable t, String s){
+  return t.._internal = _processStringBackToMap(s);
 }
 
 String _processTypeToString(Type t){
