@@ -1,28 +1,35 @@
 #Transmittable [![Build Status](https://drone.io/github.com/0xor1/transmittable/status.png)](https://drone.io/github.com/0xor1/transmittable/latest)
 
-An attempt to make a simple way of transferring **named** and **typed** properties across Http
-connections using shallow transmittable objects.
+Transmittable provides a simple way of transferring **named** and **typed**
+properties across http connections whilst also giving the benefit of static type
+checking during development.
 
 ##How To Use:
 
 Extend off of **Transmittable** to make an object transmittable accross a http 
 connection, then explicitly implement an interface for this object, but do not 
 implement any of the interfaces getters/setters which you would like to transmit.
-Then ensure the object implements the pattern of constructors in the following example.
+It is a requirement that classes extending off **Transmittable** implement a 
+default constructor, meaning it is not a named constructor and it takes no arguments.
 
 ```
+bool _tranTypesRegistered = false;
+void _registerTranTypes(){
+  if(_tranTypesRegistered){ return; }
+  _tranTypesRegistered = true;
+  registerTranSubtype('cat', Cat);
+}
+
+class Cat extends Transmittable implements ICat{}
 abstract class ICat{
   String name;
   int age;
 }
 
-class Cat extends Transmittable implements ICat{
-  Cat();
-  factory Cat.fromTranString(str) => new Transmittable.fromTranString(str, new Cat());
-}
-
-
 void main(){
+
+  _registerTranTypes();
+  
   Cat c1 = new Cat()
   ..name = 'felix'
   ..age = 3;
@@ -30,7 +37,9 @@ void main(){
   
   // send down http connection and then deserialise back into the cat object
   
-  Cat c2 = new Cat.fromTranString(tranStr);
+  Cat c2 = new Transmittable.fromTranString(tranStr);
+  print(c2 is Cat) // true
+  print(c2 == c1) // true
   print(c2.name); // felix
   print(c2.age); // 3
 }
@@ -38,19 +47,26 @@ void main(){
 
 ##Registered Types
 
-Transmittable can handle, int, bool, string, datetime, duration, regexp, list,
-set and map out of the box without any need for further effort on the users part.
+Transmittable can handle, **int**, **bool**, **String**, **DateTime**, **Duration**,
+**RegExp**, **List**, **Set** and **Map** out of the box without any need for further 
+effort on the users part.
 
 If you would like to add additional types to be transmittable simply register them
 using the top level function:
 
 ```
-registerTranType(String key, Type type, ToTranString toStr, FromTranString fromStr)
+registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode)
 //where
-typedef String ToTranString<T>(T obj);
-typedef T FromTranString<T>(String str);
+typedef String TranEncode<T>(T obj);
+typedef T TranDecode<T>(String str);
 ```
-remember this method call must be made on both the client side and the server side.
+Remember this method call must be made on both the client side and the server
+side with the same arguments. This is usually best achieved by both server and
+client side libraries referencing a common interface library which contains a
+method wrapping all your required calls to **registerTranCodec**.
+
+Additionally for **Transmittable** to be able to recreate an actual instance of
+your extended type you must register that type too with **registerTranSubtype**.
 
 ##Issues to be aware of
 
@@ -66,5 +82,4 @@ Transmittable currently has no way of detecting if an object has previously been
 serialized, so it will attempt to serialize it again, which
 means there is the potential for infinte loops when a Transmittable attempts to
 serialize objects which form a reference loop. **Transmittable** is best used 
-for simple objects for the time being to prevent this issue occuring, however
-handling of circular references is intended to be implemented in the next version. 
+for simple objects for the time being to prevent this issue occuring.
