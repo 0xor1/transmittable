@@ -4,6 +4,9 @@
 
 part of Transmittable;
 
+final Map<String, _TranCodec> _tranCodecsByKey = new Map<String, _TranCodec>();
+final Map<Type, _TranCodec> _tranCodecsByType = new Map<Type, _TranCodec>();
+
 class _TranCodec{
   final String _key;
   final Type _type;
