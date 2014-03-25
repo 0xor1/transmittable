@@ -8,11 +8,13 @@
 library Transmittable;
 
 import 'dart:mirrors';
-import 'package:bson/bson.dart' show ObjectId;
 
 part 'src/tran_codec.dart';
 part 'src/registration.dart';
 part 'src/serialization.dart';
+part 'src/deserialization.dart';
+part 'src/internal_pointer.dart';
+part 'unresolvable_nested_reference_loop_error.dart';
 part 'tran_method_error.dart';
 part 'duplicate_tran_key_error.dart';
 part 'duplicate_tran_type_error.dart';
@@ -44,25 +46,39 @@ Map<String, Type> getRegisteredMappingsByKey(){
 class Transmittable{
 
   Map<String, dynamic> _internal = new Map<String, dynamic>();
-  ObjectId _tranId;
 
   Transmittable(){
     _registerTypes();
-    _tranId = new ObjectId();
   }
 
   factory Transmittable.fromTranString(String s, [ValueProcessor postProcessor = null]){
     _registerTypes();
-    _valueProcessor = postProcessor;
-    var v = _getValueFromTranSection(s);
-    _valueProcessor = null;
+    dynamic v;
+    try{
+      _addNestedfromTranString(postProcessor);
+      v = _getValueFromTranSection(s);
+      _removeNestedfromTranString();
+    }catch(ex){
+      _deserializedCollections.clear();
+      _valueProcessors.clear();
+      _uniqueValues.clear();
+      throw ex;
+    }
     return v;
   }
 
   String toTranString([ValueProcessor preProcessor = null]){
-    _valueProcessor = preProcessor;
-    var s = _getTranSectionFromValue(this);
-    _valueProcessor = null;
+    String s;
+    try{
+      _addNestedToTranString(this, preProcessor);
+      s = _getTranSectionFromValue(this);
+      _removeNestedToTranString();
+    }catch(ex){
+      _nestedTransmittables.clear();
+      _valueProcessors.clear();
+      _uniqueValues.clear();
+      throw ex;
+    }
     return s;
   }
 
@@ -91,6 +107,4 @@ class Transmittable{
 
   void forEach(void f(k, v)) => _internal.forEach(f);
   void clear() => _internal.clear();
-  bool operator ==(Transmittable other) => other._tranId == _tranId;
-  int get hashCode => _tranId.hashCode;
 }
