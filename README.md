@@ -39,7 +39,6 @@ void main(){
   
   Cat c2 = new Transmittable.fromTranString(tranStr);
   print(c2 is Cat) // true
-  print(c2 == c1) // true
   print(c2.name); // felix
   print(c2.age); // 3
 }
