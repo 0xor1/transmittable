@@ -9,13 +9,15 @@ part of Transmittable;
  */
 void registerTranSubtype(String key, Type subtype){
   ClassMirror cm = reflectClass(subtype);
-  registerTranCodec(key, subtype, _processTranToString, (String s) => _processStringBackToTran(cm.newInstance(const Symbol(''), new List<dynamic>()).reflectee, s));
+  _registerTranCodec(key, subtype, true, _processTranToString, (String s) => _processStringBackToTran(cm.newInstance(const Symbol(''), new List<dynamic>()).reflectee, s));
 }
 
 /**
  * Registers a [type] with a given [key] to make it transmittable.
  */
-void registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode){
+void registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode) =>_registerTranCodec(key, type, false, encode, decode);
+
+void _registerTranCodec(String key, Type type, bool isTranSubtype, TranEncode encode, TranDecode decode){
   _registerTypes();
   if(key.contains(TD)){
     throw new InvalidTranKeyError(key);
@@ -24,7 +26,7 @@ void registerTranCodec(String key, Type type, TranEncode encode, TranDecode deco
   }else if(_tranCodecsByType.containsKey(type)){
     throw new DuplicateTranCodecError(type, key);
   }else{
-    _tranCodecsByKey[key] = _tranCodecsByType[type] = new _TranCodec(key, type, encode, decode);
+    _tranCodecsByKey[key] = _tranCodecsByType[type] = new _TranCodec(key, type, isTranSubtype, encode, decode);
   }
 }
 
@@ -45,6 +47,7 @@ void _registerTypes(){
   if(_typesRegistered){return;}
   _typesRegistered = true;
   registerTranCodec('_', null, (o)=> '', (s) => null);
+  registerTranCodec(IPK, _InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s)));
   registerTranCodec('n', num, (num n) => n.toString(), (String s) => num.parse(s));
   registerTranCodec('i', int, (int i) => i.toString(), (String s) => int.parse(s));
   registerTranCodec('f', double, (double f) => f.toString(), (String s) => double.parse(s));
@@ -57,6 +60,5 @@ void _registerTypes(){
   registerTranCodec('t', Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
   registerTranCodec('d', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
   registerTranCodec('du', Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s)));
-  registerTranCodec('id', ObjectId, (ObjectId id) => id.toHexString(), (String s) => new ObjectId.fromHexString(s));
   registerTranSubtype('tr', Transmittable);
 }

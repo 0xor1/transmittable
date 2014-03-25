@@ -39,7 +39,6 @@ void main(){
   
   Cat c2 = new Transmittable.fromTranString(tranStr);
   print(c2 is Cat) // true
-  print(c2 == c1) // true
   print(c2.name); // felix
   print(c2.age); // 3
 }
@@ -67,19 +66,3 @@ method wrapping all your required calls to **registerTranCodec**.
 
 Additionally for **Transmittable** to be able to recreate an actual instance of
 your extended type you must register that type too with **registerTranSubtype**.
-
-##Issues to be aware of
-
-If there are any circular references, for example:
-
-```
-var tran = Transmittable();
-tran.tran = tran; // tran has a property which points back at itself!
-tran.toTranString(); // will throw a stackoverflow error
-```
-
-Transmittable currently has no way of detecting if an object has previously been
-serialized, so it will attempt to serialize it again, which
-means there is the potential for infinte loops when a Transmittable attempts to
-serialize objects which form a reference loop. **Transmittable** is best used 
-for simple objects for the time being to prevent this issue occuring.
