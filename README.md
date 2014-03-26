@@ -12,7 +12,7 @@ implement any of the interfaces getters/setters which you would like to transmit
 It is a requirement that classes extending off **Transmittable** implement a 
 default constructor, meaning it is not a named constructor and it takes no arguments.
 
-```
+```dart
 bool _tranTypesRegistered = false;
 void _registerTranTypes(){
   if(_tranTypesRegistered){ return; }
