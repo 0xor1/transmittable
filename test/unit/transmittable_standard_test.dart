@@ -174,12 +174,15 @@ void _runStandardTests(){
       expect(() => tran.toTranString(), throwsA(new isInstanceOf<UnregisteredTranCodecError>()));
     });
 
-    test('supports pre-processing of values at encode time', (){
+    test('supports pre/post-processing of values at encode/decode time', (){
       var tran = new Transmittable()
       ..unreg = new UnregisteredType()
       ..aNum = 1;
-      var reTran = new Transmittable.fromTranString(tran.toTranString((v) => v is UnregisteredType? 'foundAnUnregisteredType!!': v));
+      var tranStr = tran.toTranString((v) => v is UnregisteredType? 'foundAnUnregisteredType!!': v);
+      var reTran = new Transmittable.fromTranString(tranStr);
       expect(reTran.unreg, equals('foundAnUnregisteredType!!'));
+      var reTranWithPostProcessing = new Transmittable.fromTranString(tranStr, (v) => v == 'foundAnUnregisteredType!!'? tran.unreg: v);
+      expect(reTranWithPostProcessing.unreg, equals(tran.unreg));
     });
 
     test('supports dynamic Transmittable type creation', (){

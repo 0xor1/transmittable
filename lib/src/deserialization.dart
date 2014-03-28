@@ -21,7 +21,7 @@ dynamic _getValueFromTranSection(String s){
     collectionPlaceholderIdx = _uniqueValues.length;
     _uniqueValues.add(collectionPlaceholder);
   }
-  var v = tranCodec._decode(s.substring(idx2 + 1));
+  var v = _valueProcessor(tranCodec._decode(s.substring(idx2 + 1)));
   if(v is _InternalPointer){ return v; }
   if(tranCodec._isTranSubtype || v is List || v is Set || v is Map){
     _deserializedCollections.add(v);
@@ -30,7 +30,6 @@ dynamic _getValueFromTranSection(String s){
   }else{
     _uniqueValues.add(v);
   }
-  v = _valueProcessor(v);
   return v;
 }
 
