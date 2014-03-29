@@ -60,5 +60,6 @@ void _registerTypes(){
   registerTranCodec('t', Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
   registerTranCodec('d', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
   registerTranCodec('du', Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s)));
+  registerTranCodec('sy', Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)); //TODO will this cause problems if multiple libraries have the same identifiers
   registerTranSubtype('tr', Transmittable);
 }

@@ -135,11 +135,18 @@ void _runStandardTests(){
       expect(reTran.map[dur], equals(dur));
     });
 
-    test('supports regexp',(){
+    test('supports regexps',(){
       var tran = new Transmittable();
       tran.regexp = new RegExp(r'^[a-z]\n', caseSensitive: false, multiLine: true);
       var reTran = new Transmittable.fromTranString(tran.toTranString());
       expect(tran.toTranString().contains(r'^[a-z]\n'), equals(true));
+    });
+
+    test('supports symbols',(){
+      var tran = new Transmittable();
+      tran.symbol = const Symbol("YO");
+      var reTran = new Transmittable.fromTranString(tran.toTranString());
+      expect(reTran.symbol, equals(tran.symbol));
     });
 
     test('supports custom types',(){
