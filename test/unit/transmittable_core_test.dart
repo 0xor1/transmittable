@@ -3,12 +3,15 @@
  */
 part of TransmittableTest;
 
-bool _registeredTranCodecs = false;
-void _registerTransmittableTypes(){
-  if(_registeredTranCodecs){return;}
-  _registeredTranCodecs = true;
-  registerTranCodec('p', Person, (p)=>p.toTranString, (s)=>new Person.fromTranSring(s));
-  registerTranSubtype('cat', Cat);
+bool _testTranTypesRegistered = false;
+void _registerTestTranTypes(){
+  if(_testTranTypesRegistered){return;}
+  _testTranTypesRegistered = true;
+  registerTranTypes('Transmittable.TransmittableTest', 't', (){
+    registerTranCodec('a', Person, (p)=> p.toTranString, (s)=> new Person.fromTranSring(s));
+    registerTranCodec('b', PotentialTranDisaster, (ptd)=> ptd.tran.toTranString((v) => v is int && v == 2? 'replaced 2': v), (s) => new PotentialTranDisaster()..tran = new Transmittable.fromTranString(s, (v) => v == 'replaced 2'? 2: v));
+    registerTranSubtype('c', Cat);
+  });
 }
 
 class UnregisteredType{}
@@ -22,7 +25,7 @@ class Person{
   final int socialSecurity;
 
   Person(this.name, this.age):socialSecurity = ssSrc++{
-    _registerTransmittableTypes();
+    _registerTestTranTypes();
   }
 
   Person._internal(this.name, this.age, this.socialSecurity);
@@ -43,8 +46,8 @@ abstract class ICat{
   int age;
 }
 
-void _runStandardTests(){
-  group('Transmittable (standard test)', (){
+void _runCoreTests(){
+  group('Transmittable (core test)', (){
 
     test('supports null',(){
       var tran = new Transmittable()
@@ -175,12 +178,6 @@ void _runStandardTests(){
       expect(reTran.double, equals(double));
     });
 
-    test('doesnt support unregistered types', (){
-      var tran = new Transmittable();
-      tran.unreg = new UnregisteredType();
-      expect(() => tran.toTranString(), throwsA(new isInstanceOf<UnregisteredTranCodecError>()));
-    });
-
     test('supports pre/post-processing of values at encode/decode time', (){
       var tran = new Transmittable()
       ..unreg = new UnregisteredType()
@@ -190,6 +187,22 @@ void _runStandardTests(){
       expect(reTran.unreg, equals('foundAnUnregisteredType!!'));
       var reTranWithPostProcessing = new Transmittable.fromTranString(tranStr, (v) => v == 'foundAnUnregisteredType!!'? tran.unreg: v);
       expect(reTranWithPostProcessing.unreg, equals(tran.unreg));
+    });
+
+    test('supports nested pre/post processing of values at encode/decode time', (){
+      var tran = new Transmittable()
+      ..one = 1
+      ..two = 2
+      ..nested = new PotentialTranDisaster();
+      tran.nested.tran = new Transmittable()
+      ..one = 1
+      ..two = 2;
+      var tranStr = tran.toTranString((v) => v is int? v * 100: v);
+      var retran = new Transmittable.fromTranString(tranStr);
+      expect(retran.one, equals(100));
+      expect(retran.two, equals(200));
+      expect(retran.nested.tran.one, equals(100));
+      expect(retran.nested.tran.two, equals(2));
     });
 
     test('supports dynamic Transmittable type creation', (){

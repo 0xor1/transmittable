@@ -13,11 +13,13 @@ It is a requirement that classes extending off **Transmittable** implement a
 default constructor, meaning it is not a named constructor and it takes no arguments.
 
 ```dart
-bool _tranTypesRegistered = false;
-void _registerTranTypes(){
-  if(_tranTypesRegistered){ return; }
-  _tranTypesRegistered = true;
-  registerTranSubtype('cat', Cat);
+bool _animalTranTypesRegistered = false;
+void registerAnimalTranTypes(){
+  if(_animalTranTypesRegistered){ return; }
+  _animalTranTypesRegistered = true;
+  registerTranTypes('Animal', 'a', (){
+    registerTranSubtype('cat', Cat);
+  });
 }
 
 class Cat extends Transmittable implements ICat{}
@@ -28,7 +30,7 @@ abstract class ICat{
 
 void main(){
 
-  _registerTranTypes();
+  registerAnimalTranTypes();
   
   Cat c1 = new Cat()
   ..name = 'felix'
