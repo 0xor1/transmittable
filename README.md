@@ -48,23 +48,39 @@ void main(){
 
 ##Registered Types
 
-Transmittable can handle, **int**, **bool**, **String**, **DateTime**, **Duration**,
-**RegExp**, **List**, **Set** and **Map** out of the box without any need for further 
+Transmittable can handle, **null**, **int**, **bool**, **String**, **DateTime**, **Duration**,
+**RegExp**, **Symbol**, **List**, **Set** and **Map** out of the box without any need for further 
 effort on the users part.
 
-If you would like to add additional types to be transmittable simply register them
-using the top level function:
+If you would like to add additional types to be transmittable or to be subtype
+of Transmittable simply register them using the same pattern that is used in the
+**Transmittable** library:
 
-```
-registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode)
-//where
-typedef String TranEncode<T>(T obj);
-typedef T TranDecode<T>(String str);
+```dart
+bool _tranTypesRegistered = false;
+void _registerTranTypes(){
+  if(_tranTypesRegistered){ return; }
+  _tranTypesRegistered = true;
+  registerTranTypes('Transmittable', '', (){
+    registerTranCodec('_', null, (o)=> '', (s) => null);
+    registerTranCodec(IPK, _InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s)));
+    registerTranCodec('a', num, (num n) => n.toString(), (String s) => num.parse(s));
+    registerTranCodec('b', int, (int i) => i.toString(), (String s) => int.parse(s));
+    registerTranCodec('c', double, (double f) => f.toString(), (String s) => double.parse(s));
+    registerTranCodec('d', String, (String s) => s, (String s) => s);
+    registerTranCodec('e', bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
+    registerTranCodec('f', List, _processIterableToString, (String s) => _processStringBackToListOrSet(new List(), s));
+    registerTranCodec('g', Set, _processIterableToString, (String s) => _processStringBackToListOrSet(new Set(), s));
+    registerTranCodec('h', Map, _processMapToString, _processStringBackToMap);
+    registerTranCodec('i', RegExp, _processRegExpToString, _processStringBackToRegExp);
+    registerTranCodec('j', Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
+    registerTranCodec('k', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
+    registerTranCodec('l', Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s)));
+    registerTranCodec('m', Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)); //TODO will this cause problems if multiple libraries have the same identifiers
+    registerTranSubtype('n', Transmittable);
+  });
+}
 ```
 Remember this method call must be made on both the client side and the server
-side with the same arguments. This is usually best achieved by both server and
-client side libraries referencing a common interface library which contains a
-method wrapping all your required calls to **registerTranCodec**.
-
-Additionally for **Transmittable** to be able to recreate an actual instance of
-your extended type you must register that type too with **registerTranSubtype**.
+side. This is usually best achieved by both server and client side libraries
+referencing a common interface library which contains this method.
