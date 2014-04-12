@@ -15,16 +15,16 @@ String _getTranSectionFromValue(dynamic v){
     _nestedTransmittables.add(v);
   }
   //handle special/subtle types, datetime and duration are the only core types implemented so far that don't seem to have a problem
-  Type type = v == null? null: v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Type? Type: reflect(v).type.reflectedType;
+  Type type = v == null? null: v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Type? Type: v is Symbol? Symbol: reflect(v).type.reflectedType;
   if(!_tranCodecsByType.containsKey(type)){
-    throw new UnregisteredTranCodecError(type);
+    throw new UnregisteredTypeError(type);
   }
   var tranCodec = _tranCodecsByType[type];
   var tranStr = tranCodec._encode(v);
   if(v is Transmittable){
     _nestedTransmittables.removeLast();
   }
-  return '${tranCodec._key}$TD${tranStr.length}$TD$tranStr';
+  return '${tranCodec._key}$TSD${tranStr.length}$TSD$tranStr';
 }
 
 dynamic _valueProcessor(dynamic v){
@@ -80,7 +80,7 @@ String _processTypeToString(Type t){
   if(_tranCodecsByType.containsKey(t)){
     return _tranCodecsByType[t]._key;
   }else{
-    throw new UnregisteredTranCodecError(t);
+    throw new UnregisteredTypeError(t);
   }
 }
 
@@ -88,5 +88,5 @@ String _processRegExpToString(RegExp r){
   var p = r.pattern;
   var c = r.isCaseSensitive? 't': 'f';
   var m = r.isMultiLine? 't': 'f';
-  return '${p.length}$TD${p}$c$m';
+  return '${p.length}$TSD${p}$c$m';
 }

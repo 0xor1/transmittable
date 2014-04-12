@@ -4,10 +4,10 @@
 
 part of Transmittable;
 
-class DuplicateTranCodecError{
+class DuplicateTranTypeError{
   String get message => 'Type "$type" has already been registered with key "$key".';
   final String key;
   final Type type;
   final Map<Type, String> mapping = getRegisteredMappingsByType();
-  const DuplicateTranCodecError(Type this.type, String this.key);
+  const DuplicateTranTypeError(Type this.type, String this.key);
 }

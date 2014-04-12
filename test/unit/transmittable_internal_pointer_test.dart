@@ -3,6 +3,10 @@
  */
 part of TransmittableTest;
 
+class PotentialTranDisaster{
+  Transmittable tran;
+}
+
 void _runInternalPointerTests(){
   group('Transmittable (InternalPointer test)', (){
 
@@ -61,6 +65,13 @@ void _runInternalPointerTests(){
       expect(reSet.contains(reMap), equals(true));
       expect(reSet.contains(reList), equals(true));
       expect(reSet.contains(reSet), equals(true));
+    });
+
+    test('can handle non-dangerous nested toTranString calls', (){
+      var tran = new Transmittable();
+      tran.avertedDisaster = new PotentialTranDisaster()..tran = new Transmittable();
+      var reTran = new Transmittable.fromTranString(tran.toTranString());
+      expect(reTran.avertedDisaster is PotentialTranDisaster, equals(true));
     });
 
   });

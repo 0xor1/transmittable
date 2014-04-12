@@ -15,14 +15,21 @@ part 'src/serialization.dart';
 part 'src/deserialization.dart';
 part 'src/internal_pointer.dart';
 part 'unresolvable_nested_reference_loop_error.dart';
+part 'tran_registration_outside_of_namespace_error.dart';
 part 'tran_method_error.dart';
 part 'duplicate_tran_key_error.dart';
 part 'duplicate_tran_type_error.dart';
 part 'unregistered_tran_codec_error.dart';
 part 'invalid_tran_key_error.dart';
+part 'invalid_tran_namespace_error.dart';
+part 'duplicate_tran_namespace_error.dart';
+part 'nested_register_tran_types_call_error.dart';
 
-const String TRAN_DELIMITER = ':';
-const String TD = TRAN_DELIMITER;
+const String TRAN_SECTION_DELIMITER = ':';
+const String TSD = TRAN_SECTION_DELIMITER;
+
+const String TRAN_NAMESPACE_DELIMITER = '.';
+const String TND = TRAN_NAMESPACE_DELIMITER;
 
 /*
  * A function to processes each value either before serialization
@@ -48,11 +55,11 @@ class Transmittable{
   Map<String, dynamic> _internal = new Map<String, dynamic>();
 
   Transmittable(){
-    _registerTypes();
+    _registerTranTypes();
   }
 
   factory Transmittable.fromTranString(String s, [ValueProcessor postProcessor = null]){
-    _registerTypes();
+    _registerTranTypes();
     dynamic v;
     try{
       _addNestedfromTranString(postProcessor);
