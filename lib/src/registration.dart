@@ -83,10 +83,10 @@ typedef String TranEncode<T>(T obj);
  */
 typedef T TranDecode<T>(String str);
 
-bool _registeredTranTypes = false;
+bool _tranTypesRegistered = false;
 void _registerTranTypes(){
-  if(_registeredTranTypes){ return; }
-  _registeredTranTypes = true;
+  if(_tranTypesRegistered){ return; }
+  _tranTypesRegistered = true;
   registerTranTypes('Transmittable', '', (){
     registerTranCodec('_', null, (o)=> '', (s) => null);
     registerTranCodec(IPK, _InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s)));
@@ -105,5 +105,4 @@ void _registerTranTypes(){
     registerTranCodec('m', Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)); //TODO will this cause problems if multiple libraries have the same identifiers
     registerTranSubtype('n', Transmittable);
   });
-
 }
