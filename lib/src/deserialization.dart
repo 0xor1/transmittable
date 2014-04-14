@@ -14,7 +14,7 @@ dynamic _getValueFromTranSection(String s){
   var key = s.substring(0, idx1);
   var tranCodec = _tranCodecsByKey[key];
   var type = tranCodec._type;
-  var collectionPlaceholder = new Object();
+  var collectionPlaceholder;
   int collectionPlaceholderIdx;
   if(tranCodec._isTranSubtype || type == List || type == Set || type == Map){
     collectionPlaceholder = new Object();

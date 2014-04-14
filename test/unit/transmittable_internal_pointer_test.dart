@@ -67,9 +67,10 @@ void _runInternalPointerTests(){
       expect(reSet.contains(reSet), equals(true));
     });
 
-    test('can handle non-dangerous nested toTranString calls', (){
+    test('supports non-dangerous nested toTranString calls', (){
       var tran = new Transmittable();
       tran.avertedDisaster = new PotentialTranDisaster()..tran = new Transmittable();
+      tran.avertedDisaster.tran.tran = tran;
       var reTran = new Transmittable.fromTranString(tran.toTranString());
       expect(reTran.avertedDisaster is PotentialTranDisaster, equals(true));
     });
