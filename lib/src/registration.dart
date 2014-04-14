@@ -15,6 +15,7 @@ String _currentNamespace = null;
  * help with debugging if namespace clashes do occur.
  */
 void registerTranTypes(String namespaceFull, String namespace, void registerTypes()){
+  _registerTranTranTypes();
   try{
     if(_currentNamespace != null){
       throw new NestedRegisterTranTypesCallError(_currentNamespace, namespace);
@@ -55,7 +56,6 @@ void _registerTranCodec(String key, Type type, bool isTranSubtype, TranEncode en
   if(_currentNamespace == null){
     throw new TranRegistrationOutsideOfNamespaceError(key, type);
   }
-  _registerTranTypes();
   var illegalPattern = new RegExp('[$TSD$TND]');
   if(key.contains(illegalPattern)){
     throw new InvalidTranKeyError(key);
@@ -83,10 +83,10 @@ typedef String TranEncode<T>(T obj);
  */
 typedef T TranDecode<T>(String str);
 
-bool _tranTypesRegistered = false;
-void _registerTranTypes(){
-  if(_tranTypesRegistered){ return; }
-  _tranTypesRegistered = true;
+bool _tranTranTypesRegistered = false;
+void _registerTranTranTypes(){
+  if(_tranTranTypesRegistered){ return; }
+  _tranTranTypesRegistered = true;
   registerTranTypes('Transmittable', '', (){
     registerTranCodec('_', null, (o)=> '', (s) => null);
     registerTranCodec(IPK, _InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s)));

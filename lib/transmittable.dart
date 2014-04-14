@@ -55,11 +55,11 @@ class Transmittable{
   Map<String, dynamic> _internal = new Map<String, dynamic>();
 
   Transmittable(){
-    _registerTranTypes();
+    _registerTranTranTypes();
   }
 
   factory Transmittable.fromTranString(String s, [ValueProcessor postProcessor = null]){
-    _registerTranTypes();
+    _registerTranTranTypes();
     dynamic v;
     try{
       _addNestedfromTranString(postProcessor);

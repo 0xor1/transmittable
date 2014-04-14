@@ -12,6 +12,7 @@ part 'transmittable_error_test.dart';
 
 
 void main(){
+  _registerTestTranTypes();
   _runCoreTests();
   _runInternalPointerTests();
   _runErrorTests();
