@@ -4,7 +4,7 @@
 
 part of Transmittable;
 
-List<dynamic> _deserializedCollections = new List<dynamic>();
+List<dynamic> _collectionsWithInternalPointers = new List<dynamic>();
 int _nestedFromTranStringCount = -1;
 
 
@@ -24,7 +24,6 @@ dynamic _getValueFromTranSection(String s){
   var v = _valueProcessor(tranCodec._decode(s.substring(idx2 + 1)));
   if(v is _InternalPointer){ return v; }
   if(tranCodec._isTranSubtype || v is List || v is Set || v is Map){
-    _deserializedCollections.add(v);
     _uniqueValues.insert(collectionPlaceholderIdx, v);
     _uniqueValues.remove(collectionPlaceholder);
   }else{
@@ -41,13 +40,13 @@ void _removeNestedfromTranString(){
   _valueProcessors.removeLast();
   if(_valueProcessors.isEmpty){
     _resolveInternalPointers();
-    _deserializedCollections.clear();
+    _collectionsWithInternalPointers.clear();
     _uniqueValues.clear();
   }
 }
 
 void _resolveInternalPointers(){
-  _deserializedCollections.forEach((col){
+  _collectionsWithInternalPointers.forEach((col){
     if(col is Transmittable){
       _resolveInternalPointersInMap(col._internal);
     }else if(col is Map){
@@ -95,11 +94,17 @@ void _resolveInternalPointersInMap(Map m){
 dynamic _processStringBackToListOrSet(dynamic col, String s){
   if(!(col is Set) && !(col is List)){ throw 'Expecting either List or Set only'; }
   int start = 0;
+  bool addedToResolveList = false;
   while(start < s.length){
     var dataLengthStartIdx = s.indexOf(TSD, start) + 1;
     var dataLengthEndIdx = s.indexOf(TSD, dataLengthStartIdx);
     var dataEndIdx = dataLengthEndIdx + int.parse(s.substring(dataLengthStartIdx, dataLengthEndIdx)) + 1;
-    col.add(_getValueFromTranSection(s.substring(start, dataEndIdx)));
+    var val = _getValueFromTranSection(s.substring(start, dataEndIdx));
+    if(addedToResolveList == false && val is _InternalPointer){
+      _collectionsWithInternalPointers.add(col);
+      addedToResolveList = true;
+    }
+    col.add(val);
     start = dataEndIdx;
   }
   return col;
@@ -108,6 +113,7 @@ dynamic _processStringBackToListOrSet(dynamic col, String s){
 Map<dynamic, dynamic> _processStringBackToMap(String s){
   Map<dynamic, dynamic> map = new Map();
   int start = 0;
+  bool addedToResolveList = false;
   while(start < s.length){
     var key;
     for(var i = 0; i < 2; i++){
@@ -118,6 +124,10 @@ Map<dynamic, dynamic> _processStringBackToMap(String s){
         key = _getValueFromTranSection(s.substring(start, dataEndIdx));
       }else{
         map[key] = _getValueFromTranSection(s.substring(start, dataEndIdx));
+        if(addedToResolveList == false && (key is _InternalPointer || map[key] is _InternalPointer)){
+          _collectionsWithInternalPointers.add(map);
+          addedToResolveList = true;
+        }
       }
       start = dataEndIdx;
     }
