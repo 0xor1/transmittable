@@ -4,16 +4,12 @@
 
 part of Transmittable;
 
-final List<Transmittable> _nestedTransmittables = new List<Transmittable>();
 final List<ValueProcessor> _valueProcessors = new List<ValueProcessor>();
 final List<dynamic> _uniqueValues = new List<dynamic>();
 
 String _getTranSectionFromValue(dynamic v){
   v = _valueProcessor(v);
   v = _handleUniqueValues(v);
-  if(v is Transmittable){
-    _nestedTransmittables.add(v);
-  }
   //handle special/subtle types, datetime and duration are the only core types implemented so far that don't seem to have a problem
   Type type = v == null? null: v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Type? Type: v is Symbol? Symbol: reflect(v).type.reflectedType;
   if(!_tranCodecsByType.containsKey(type)){
@@ -21,9 +17,6 @@ String _getTranSectionFromValue(dynamic v){
   }
   var tranCodec = _tranCodecsByType[type];
   var tranStr = tranCodec._encode(v);
-  if(v is Transmittable){
-    _nestedTransmittables.removeLast();
-  }
   return '${tranCodec._key}$TSD${tranStr.length}$TSD$tranStr';
 }
 
@@ -46,7 +39,7 @@ dynamic _handleUniqueValues(dynamic v){
 }
 
 void _addNestedToTranString(Transmittable tran, ValueProcessor preProcessor){
-  if(_nestedTransmittables.contains(tran)){
+  if(_uniqueValues.contains(tran)){
     throw new UnresolvableNestedReferenceLoopError(tran);
   }else{
     _valueProcessors.add(preProcessor);
