@@ -81,7 +81,6 @@ class Transmittable{
       s = _getTranSectionFromValue(this);
       _removeNestedToTranString();
     }catch(ex){
-      _nestedTransmittables.clear();
       _valueProcessors.clear();
       _uniqueValues.clear();
       throw ex;

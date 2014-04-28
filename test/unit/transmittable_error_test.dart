@@ -78,9 +78,16 @@ void _runErrorTests(){
           throwsA(new isInstanceOf<TranRegistrationOutsideOfNamespaceError>()));
     });
 
-    test('correctly detects the creation of unresolvable nested reference loops', (){
+    test('correctly detects the creation of unresolvable nested reference loops (1)', (){
       var tran = new Transmittable();
       tran.disaster = new PotentialTranDisaster()..tran = tran;
+      expect(() => tran.toTranString(), throwsA(new isInstanceOf<UnresolvableNestedReferenceLoopError>()));
+    });
+
+    test('correctly detects the creation of unresolvable nested reference loops (2)', (){
+      var tran = new Transmittable();
+      tran.tran = new Transmittable();
+      tran.disaster = new PotentialTranDisaster()..tran = tran.tran;
       expect(() => tran.toTranString(), throwsA(new isInstanceOf<UnresolvableNestedReferenceLoopError>()));
     });
 
