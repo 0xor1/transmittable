@@ -76,7 +76,7 @@ void _registerTranTypes(){
     registerTranCodec('j', Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
     registerTranCodec('k', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
     registerTranCodec('l', Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s)));
-    registerTranCodec('m', Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)); //TODO will this cause problems if multiple libraries have the same identifiers
+    registerTranCodec('m', Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s));
     registerTranSubtype('n', Transmittable);
   });
 }
