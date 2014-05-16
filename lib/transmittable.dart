@@ -1,11 +1,11 @@
 /**
- * author: Daniel Robinson http://github.com/0xor1
+ * Author:  Daniel Robinson http://github.com/0xor1
  */
 
 /**
  * Data structures for de/serializing typed objects to and from strings
  */
-library Transmittable;
+library transmittable;
 
 import 'dart:mirrors';
 
@@ -14,16 +14,16 @@ part 'src/registration.dart';
 part 'src/serialization.dart';
 part 'src/deserialization.dart';
 part 'src/internal_pointer.dart';
-part 'unresolvable_nested_reference_loop_error.dart';
-part 'tran_registration_outside_of_namespace_error.dart';
-part 'tran_method_error.dart';
-part 'duplicate_tran_key_error.dart';
-part 'duplicate_tran_type_error.dart';
-part 'unregistered_tran_codec_error.dart';
-part 'invalid_tran_key_error.dart';
-part 'invalid_tran_namespace_error.dart';
-part 'duplicate_tran_namespace_error.dart';
-part 'nested_register_tran_types_call_error.dart';
+part 'src/error/unresolvable_nested_reference_loop_error.dart';
+part 'src/error/tran_registration_outside_of_namespace_error.dart';
+part 'src/error/tran_method_error.dart';
+part 'src/error/duplicate_tran_key_error.dart';
+part 'src/error/duplicate_tran_type_error.dart';
+part 'src/error/unregistered_tran_codec_error.dart';
+part 'src/error/invalid_tran_key_error.dart';
+part 'src/error/invalid_tran_namespace_error.dart';
+part 'src/error/duplicate_tran_namespace_error.dart';
+part 'src/error/nested_register_tran_types_call_error.dart';
 
 const String TRAN_SECTION_DELIMITER = ':';
 const String TSD = TRAN_SECTION_DELIMITER;
@@ -66,7 +66,7 @@ class Transmittable{
       v = _getValueFromTranSection(s);
       _removeNestedfromTranString();
     }catch(ex){
-      _deserializedCollections.clear();
+      _collectionsWithInternalPointers.clear();
       _valueProcessors.clear();
       _uniqueValues.clear();
       throw ex;

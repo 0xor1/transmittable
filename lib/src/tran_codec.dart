@@ -1,8 +1,8 @@
 /**
- * author: Daniel Robinson http://github.com/0xor1
+ * Author:  Daniel Robinson http://github.com/0xor1
  */
 
-part of Transmittable;
+part of transmittable;
 
 final Map<String, _TranCodec> _tranCodecsByKey = new Map<String, _TranCodec>();
 final Map<Type, _TranCodec> _tranCodecsByType = new Map<Type, _TranCodec>();

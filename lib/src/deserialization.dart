@@ -1,8 +1,8 @@
 /**
- * author: Daniel Robinson  http://github.com/0xor1
+ * Author:  Daniel Robinson http://github.com/0xor1
  */
 
-part of Transmittable;
+part of transmittable;
 
 List<dynamic> _collectionsWithInternalPointers = new List<dynamic>();
 int _nestedFromTranStringCount = -1;

@@ -1,8 +1,8 @@
 /**
- * author: Daniel Robinson  http://github.com/0xor1
+ * Author:  Daniel Robinson http://github.com/0xor1
  */
 
-part of Transmittable;
+part of transmittable;
 
 final List<ValueProcessor> _valueProcessors = new List<ValueProcessor>();
 final List<dynamic> _uniqueValues = new List<dynamic>();
