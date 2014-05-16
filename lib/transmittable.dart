@@ -66,7 +66,7 @@ class Transmittable{
       v = _getValueFromTranSection(s);
       _removeNestedfromTranString();
     }catch(ex){
-      _deserializedCollections.clear();
+      _collectionsWithInternalPointers.clear();
       _valueProcessors.clear();
       _uniqueValues.clear();
       throw ex;
