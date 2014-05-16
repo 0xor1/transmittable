@@ -2,7 +2,7 @@
  * author: Daniel Robinson http://github.com/0xor1
  */
 
-part of Transmittable;
+part of transmittable;
 
 class DuplicateTranKeyError{
   String get message => 'Key "$key" has already been registered with type "$type".';

@@ -2,7 +2,7 @@
  * author: Daniel Robinson http://github.com/0xor1
  */
 
-part of Transmittable;
+part of transmittable;
 
 class TranRegistrationOutsideOfNamespaceError{
   String get message => 'Calls to registerTranCodec and registerTranSubtype must only be made from within the second parameter of registerTranTypes.';

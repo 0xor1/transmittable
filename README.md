@@ -61,7 +61,7 @@ bool _tranTypesRegistered = false;
 void _registerTranTypes(){
   if(_tranTypesRegistered){ return; }
   _tranTypesRegistered = true;
-  registerTranTypes('Transmittable', '', (){
+  registerTranTypes('transmittable', '', (){
     registerTranCodec('_', null, (o)=> '', (s) => null);
     registerTranCodec(IPK, _InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s)));
     registerTranCodec('a', num, (num n) => n.toString(), (String s) => num.parse(s));

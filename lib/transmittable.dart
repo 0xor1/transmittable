@@ -5,7 +5,7 @@
 /**
  * Data structures for de/serializing typed objects to and from strings
  */
-library Transmittable;
+library transmittable;
 
 import 'dart:mirrors';
 
