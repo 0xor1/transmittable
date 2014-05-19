@@ -5,7 +5,7 @@
 part of transmittable;
 
 class InvalidTranKeyError{
-  String get message => 'Key "$key" is invalid. Tran keys must not contain a "$TSD" or "$TND" character';
+  String get message => 'Key "$key" is invalid. Tran keys must not contain a "$TSD" character';
   final String key;
   InvalidTranKeyError(String this.key);
 }
