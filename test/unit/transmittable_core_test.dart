@@ -213,5 +213,12 @@ void _runCoreTests(){
       expect(reCat is Cat, true);
     });
 
+    test('supports getters when the Transmittable is locked', (){
+      var tran = new Transmittable()
+      ..pi = 3.142;
+      tran.lock();
+      expect(tran.pi, equals(3.142));
+    });
+
   });
 }

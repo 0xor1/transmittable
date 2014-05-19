@@ -20,7 +20,7 @@ void registerTranTypes(String namespaceFull, String namespace, void registerType
     if(_currentNamespace != null){
       throw new NestedRegisterTranTypesCallError(_currentNamespace, namespace);
     }
-    var illegalPattern = new RegExp('[$TSD$TND]');
+    var illegalPattern = new RegExp('[$TSD]');
     if(namespace.contains(illegalPattern)){
       throw new InvalidTranNamespaceError(namespace);
     }
@@ -56,7 +56,7 @@ void _registerTranCodec(String key, Type type, bool isTranSubtype, TranEncode en
   if(_currentNamespace == null){
     throw new TranRegistrationOutsideOfNamespaceError(key, type);
   }
-  var illegalPattern = new RegExp('[$TSD$TND]');
+  var illegalPattern = new RegExp('[$TSD]');
   if(key.contains(illegalPattern)){
     throw new InvalidTranKeyError(key);
   }else{

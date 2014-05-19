@@ -24,12 +24,10 @@ part 'src/error/invalid_tran_key_error.dart';
 part 'src/error/invalid_tran_namespace_error.dart';
 part 'src/error/duplicate_tran_namespace_error.dart';
 part 'src/error/nested_register_tran_types_call_error.dart';
+part 'src/error/transmittable_locked_error.dart';
 
 const String TRAN_SECTION_DELIMITER = ':';
 const String TSD = TRAN_SECTION_DELIMITER;
-
-const String TRAN_NAMESPACE_DELIMITER = '.';
-const String TND = TRAN_NAMESPACE_DELIMITER;
 
 /*
  * A function to processes each value either before serialization
@@ -88,6 +86,14 @@ class Transmittable{
     return s;
   }
 
+  /**
+   * Locks the Transmittable object such that calling a setter on it will
+   * throw a [TransmittableLockedError], this is an irreversible process.
+   */
+  void lock(){
+    _internal['_locked'] = true;
+  }
+
   noSuchMethod(Invocation inv){
 
     if(inv.isMethod){
@@ -103,6 +109,9 @@ class Transmittable{
       }
       return null;
     }else if(inv.isSetter && positionalArgs == 1){
+      if(_internal['_locked'] == true){
+        throw new TransmittableLockedError(MirrorSystem.getName(inv.memberName));
+      }
       property = property.replaceAll("=", "");
       _internal[property] = inv.positionalArguments[0];
       return _internal[property];
