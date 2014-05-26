@@ -10,7 +10,7 @@ void _registerTestTranTypes(){
   registerTranTypes('Transmittable.TransmittableTest', 't', (){
     registerTranCodec('a', Person, (p)=> p.toTranString, (s)=> new Person.fromTranSring(s));
     registerTranCodec('b', PotentialTranDisaster, (ptd)=> ptd.tran.toTranString((v) => v is int && v == 2? 'replaced 2': v), (s) => new PotentialTranDisaster()..tran = new Transmittable.fromTranString(s, (v) => v == 'replaced 2'? 2: v));
-    registerTranSubtype('c', Cat);
+    registerTranSubtype('c', Cat, () => new Cat());
   });
 }
 

@@ -63,7 +63,7 @@ void _runErrorTests(){
     });
 
     test('doesn\'t allow subtypes to be registered outside of registerTranTypes', (){
-      expect(()=> registerTranSubtype('a', Object),
+      expect(()=> registerTranSubtype('a', Object, () => new Object()),
           throwsA(new isInstanceOf<TranRegistrationOutsideOfNamespaceError>()));
     });
 
