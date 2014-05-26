@@ -83,7 +83,7 @@ typedef String TranEncode<T>(T obj);
 typedef T TranDecode<T>(String str);
 
 /**
- *  A function which takes a new empty Transmittable type.
+ *  A function which returns a new empty Transmittable type.
  */
 typedef T TranConstructor<T extends Transmittable>();
 
