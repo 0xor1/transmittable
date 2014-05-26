@@ -18,7 +18,7 @@ void registerAnimalTranTypes(){
   if(_animalTranTypesRegistered){ return; }
   _animalTranTypesRegistered = true;
   registerTranTypes('Animal', 'a', (){
-    registerTranSubtype('cat', Cat);
+    registerTranSubtype('cat', Cat, () => new Cat());
   });
 }
 
@@ -77,7 +77,7 @@ void _registerTranTypes(){
     registerTranCodec('k', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
     registerTranCodec('l', Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s)));
     registerTranCodec('m', Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s));
-    registerTranSubtype('n', Transmittable);
+    registerTranSubtype('n', Transmittable, () => new Transmittable());
   });
 }
 ```
