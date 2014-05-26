@@ -36,7 +36,7 @@ void registerTranTypes(String namespaceFull, String namespace, void registerType
 }
 
 /**
- * Register a [subtype] of [Transmittable].
+ * Register a [subtype] of [Transmittable] along with a [constructor] function.
  * Calls to this function can only be made inside the last argument of [registerTranTypes].
  * This is to ensure all [key]-[subtype] registrations are properly namespaced.
  */
@@ -83,7 +83,7 @@ typedef String TranEncode<T>(T obj);
 typedef T TranDecode<T>(String str);
 
 /**
- *  A function which takes a new empty Transmittable type.
+ *  A function which returns a new empty Transmittable type.
  */
 typedef T TranConstructor<T extends Transmittable>();
 
