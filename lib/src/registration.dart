@@ -40,9 +40,8 @@ void registerTranTypes(String namespaceFull, String namespace, void registerType
  * Calls to this function can only be made inside the last argument of [registerTranTypes].
  * This is to ensure all [key]-[subtype] registrations are properly namespaced.
  */
-void registerTranSubtype(String key, Type subtype){
-  ClassMirror cm = reflectClass(subtype);
-  _registerTranCodec(key, subtype, true, _processTranToString, (String s) => _processStringBackToTran(cm.newInstance(const Symbol(''), new List<dynamic>()).reflectee, s));
+void registerTranSubtype(String key, Type subtype,  TranConstructor constructor){
+  _registerTranCodec(key, subtype, true, _processTranToString, (String s) => _processStringBackToTran(constructor(), s));
 }
 
 /**
@@ -83,6 +82,11 @@ typedef String TranEncode<T>(T obj);
  */
 typedef T TranDecode<T>(String str);
 
+/**
+ *  A function which takes a new empty Transmittable type.
+ */
+typedef T TranConstructor<T extends Transmittable>();
+
 bool _tranTranTypesRegistered = false;
 void _registerTranTranTypes(){
   if(_tranTranTypesRegistered){ return; }
@@ -103,6 +107,6 @@ void _registerTranTranTypes(){
     registerTranCodec('k', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
     registerTranCodec('l', Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s)));
     registerTranCodec('m', Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)); //TODO will this cause problems if multiple libraries have the same identifiers
-    registerTranSubtype('n', Transmittable);
+    registerTranSubtype('n', Transmittable, () => new Transmittable());
   });
 }

@@ -7,6 +7,7 @@
  */
 library transmittable;
 
+@MirrorsUsed(targets: const[], override: '*')
 import 'dart:mirrors';
 
 part 'src/tran_codec.dart';
