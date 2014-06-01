@@ -18,10 +18,8 @@ part 'src/internal_pointer.dart';
 part 'src/error/unresolvable_nested_reference_loop_error.dart';
 part 'src/error/tran_registration_outside_of_namespace_error.dart';
 part 'src/error/tran_method_error.dart';
-part 'src/error/duplicate_tran_key_error.dart';
 part 'src/error/duplicate_tran_type_error.dart';
 part 'src/error/unregistered_tran_codec_error.dart';
-part 'src/error/invalid_tran_key_error.dart';
 part 'src/error/invalid_tran_namespace_error.dart';
 part 'src/error/duplicate_tran_namespace_error.dart';
 part 'src/error/nested_register_tran_types_call_error.dart';
@@ -29,7 +27,19 @@ part 'src/error/transmittable_locked_error.dart';
 
 const String TRAN_SECTION_DELIMITER = ':';
 const String TSD = TRAN_SECTION_DELIMITER;
+const List<String> KEY_PIECES = const [
+  '1', '!', '2', '"', '3', '£', '4', r'$', '5', '%', '6', '^', '7', '&', '8', '*', '9', '(', '0', ')',
+  'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F', 'g', 'G', 'h', 'H', 'i', 'I', 'j', 'J',
+  'k', 'K', 'l', 'L', 'm', 'M', 'n', 'N', 'o', 'O', 'p', 'P', 'q', 'Q', 'r', 'R', 's', 'S', 't', 'T', 
+  'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z', r'\', '|', ',', '<', '.', '>', '/', '?',
+  ';', "'", '@', '#', '~', '[', '{', ']', '}', '-', '_', '=', '+', '`', '¬'
+];
 
+/**
+ * 2 unit test required:
+ * 2) ensure that _KEY_PIECES does not contain the empty string, very important!
+ * 1) register _KEY_PIECES.length number of codecs and ensure no errors thrown - this shows that no duplicate key pieces exist in the list
+*/
 /*
  * A function to processes each value either before serialization
  * or after deserialization
