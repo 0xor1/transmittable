@@ -6,6 +6,7 @@ part of transmittable;
 
 final Map<String, String> _namespaces = new Map<String, String>();
 String _currentNamespace = null;
+int _currentNamespaceKeyCount = 0;
 
 /**
  * Register a group of [Transmittable] types inside a [namespace].
@@ -20,8 +21,7 @@ void registerTranTypes(String namespaceFull, String namespace, void registerType
     if(_currentNamespace != null){
       throw new NestedRegisterTranTypesCallError(_currentNamespace, namespace);
     }
-    var illegalPattern = new RegExp('[$TSD]');
-    if(namespace.contains(illegalPattern)){
+    if(namespace.contains(TSD)){
       throw new InvalidTranNamespaceError(namespace);
     }
     if(_namespaces.keys.contains(namespace)){
@@ -32,6 +32,7 @@ void registerTranTypes(String namespaceFull, String namespace, void registerType
     registerTypes();
   }finally{
     _currentNamespace = null;
+    _currentNamespaceKeyCount = 0;
   }
 }
 
@@ -40,8 +41,8 @@ void registerTranTypes(String namespaceFull, String namespace, void registerType
  * Calls to this function can only be made inside the last argument of [registerTranTypes].
  * This is to ensure all [key]-[subtype] registrations are properly namespaced.
  */
-void registerTranSubtype(String key, Type subtype,  TranConstructor constructor){
-  _registerTranCodec(key, subtype, true, _processTranToString, (String s) => _processStringBackToTran(constructor(), s));
+void registerTranSubtype(Type subtype,  TranConstructor constructor){
+  _registerTranCodec(subtype, true, _processTranToString, (String s) => _processStringBackToTran(constructor(), s));
 }
 
 /**
@@ -49,25 +50,35 @@ void registerTranSubtype(String key, Type subtype,  TranConstructor constructor)
  * Calls to this function can only be made inside the last argument of [registerTranTypes].
  * This is to ensure all [key]-[type] registrations are properly namespaced.
  */
-void registerTranCodec(String key, Type type, TranEncode encode, TranDecode decode) =>_registerTranCodec(key, type, false, encode, decode);
+void registerTranCodec(Type type, TranEncode encode, TranDecode decode) =>_registerTranCodec(type, false, encode, decode);
 
-void _registerTranCodec(String key, Type type, bool isTranSubtype, TranEncode encode, TranDecode decode){
+void _registerTranCodec(Type type, bool isTranSubtype, TranEncode encode, TranDecode decode){
   if(_currentNamespace == null){
-    throw new TranRegistrationOutsideOfNamespaceError(key, type);
+    throw new TranRegistrationOutsideOfNamespaceError(type);
   }
-  var illegalPattern = new RegExp('[$TSD]');
-  if(key.contains(illegalPattern)){
-    throw new InvalidTranKeyError(key);
-  }else{
-    key = '$_currentNamespace.$key';
+  if(_tranCodecsByType.containsKey(type)){
+    throw new DuplicateTranTypeError(type);
   }
-  if(_tranCodecsByKey.containsKey(key)){
-    throw new DuplicateTranKeyError(key, type);
-  }else if(_tranCodecsByType.containsKey(type)){
-    throw new DuplicateTranTypeError(type, key);
-  }else{
-    _tranCodecsByKey[key] = _tranCodecsByType[type] = new _TranCodec(key, type, isTranSubtype, encode, decode);
-  }
+  String key = '$_currentNamespace${_GetNextKeyForCurrentNamespace()}';
+  _tranCodecsByKey[key] = _tranCodecsByType[type] = new _TranCodec(key, type, isTranSubtype, encode, decode);
+  
+}
+
+String _GetNextKeyForCurrentNamespace(){
+  StringBuffer keyBuff = new StringBuffer();
+  int base = KEY_PIECES.length;
+  int tempCount = _currentNamespaceKeyCount;
+  do{
+    int division = tempCount ~/ base;
+    int remainder = tempCount - (division * base);
+    keyBuff.write(KEY_PIECES[remainder]);
+    if(division == 0){
+      break;
+    }
+    tempCount = division;
+  }while(true);
+  _currentNamespaceKeyCount++;
+  return keyBuff.toString();
 }
 
 /**
@@ -92,21 +103,21 @@ void _registerTranTranTypes(){
   if(_tranTranTypesRegistered){ return; }
   _tranTranTypesRegistered = true;
   registerTranTypes('transmittable', '', (){
-    registerTranCodec('_', null, (o)=> '', (s) => null);
-    registerTranCodec(IPK, _InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s)));
-    registerTranCodec('a', num, (num n) => n.toString(), (String s) => num.parse(s));
-    registerTranCodec('b', int, (int i) => i.toString(), (String s) => int.parse(s));
-    registerTranCodec('c', double, (double f) => f.toString(), (String s) => double.parse(s));
-    registerTranCodec('d', String, (String s) => s, (String s) => s);
-    registerTranCodec('e', bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
-    registerTranCodec('f', List, _processIterableToString, (String s) => _processStringBackToListOrSet(new List(), s));
-    registerTranCodec('g', Set, _processIterableToString, (String s) => _processStringBackToListOrSet(new Set(), s));
-    registerTranCodec('h', Map, _processMapToString, _processStringBackToMap);
-    registerTranCodec('i', RegExp, _processRegExpToString, _processStringBackToRegExp);
-    registerTranCodec('j', Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
-    registerTranCodec('k', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
-    registerTranCodec('l', Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s)));
-    registerTranCodec('m', Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)); //TODO will this cause problems if multiple libraries have the same identifiers
-    registerTranSubtype('n', Transmittable, () => new Transmittable());
+    registerTranCodec(null, (o)=> '', (s) => null);
+    registerTranCodec(_InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s)));
+    registerTranCodec(num, (num n) => n.toString(), (String s) => num.parse(s));
+    registerTranCodec(int, (int i) => i.toString(), (String s) => int.parse(s));
+    registerTranCodec(double, (double f) => f.toString(), (String s) => double.parse(s));
+    registerTranCodec(String, (String s) => s, (String s) => s);
+    registerTranCodec(bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
+    registerTranCodec(List, _processIterableToString, (String s) => _processStringBackToListOrSet(new List(), s));
+    registerTranCodec(Set, _processIterableToString, (String s) => _processStringBackToListOrSet(new Set(), s));
+    registerTranCodec(Map, _processMapToString, _processStringBackToMap);
+    registerTranCodec(RegExp, _processRegExpToString, _processStringBackToRegExp);
+    registerTranCodec(Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
+    registerTranCodec(DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
+    registerTranCodec(Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s)));
+    registerTranCodec(Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)); //TODO will this cause problems if multiple libraries have the same identifiers
+    registerTranSubtype(Transmittable, () => new Transmittable());
   });
 }

@@ -8,6 +8,11 @@ class DumbyTypeB{}
 
 void _runErrorTests(){
   group('Transmittable (error test)', (){
+    
+    test('KEY_PIECES doesn\'t allow changes to itself', (){
+      expect(() => KEY_PIECES.remove('a'), throwsA(new isInstanceOf<UnsupportedError>()));
+      expect(() => KEY_PIECES.add('a'), throwsA(new isInstanceOf<UnsupportedError>()));
+    });
 
     test('doesn\'t support unregistered types', (){
       var tran = new Transmittable();
@@ -15,23 +20,10 @@ void _runErrorTests(){
       expect(() => tran.toTranString(), throwsA(new isInstanceOf<UnregisteredTypeError>()));
     });
 
-    test('doesn\'t allow duplicate keys within a namespace', (){
-      expect(()=> registerTranTypes('Transmittable.ErrorTest1', 'tet1', (){
-        registerTranCodec('a', DumbyTypeA, (_){}, (_){});
-        registerTranCodec('a', DumbyTypeB, (_){}, (_){});
-      }), throwsA(new isInstanceOf<DuplicateTranKeyError>()));
-    });
-
     test('doesn\'t allow duplicate type registration', (){
       expect(()=> registerTranTypes('Transmittable.ErrorTest2', 'tet2', (){
-        registerTranCodec('a', null, (_){}, (_){}); //null is already registered in core
+        registerTranCodec(null, (_){}, (_){}); //null is already registered in core
       }), throwsA(new isInstanceOf<DuplicateTranTypeError>()));
-    });
-
-    test('doesn\'t allow keys to contain the $TSD character', (){
-      expect(()=> registerTranTypes('Transmittable.ErrorTest3', 'tet3', (){
-        registerTranCodec('a$TSD', null, (_){}, (_){});
-      }), throwsA(new isInstanceOf<InvalidTranKeyError>()));
     });
 
     test('doesn\'t allow namespaces to contain the $TSD character', (){
@@ -58,12 +50,12 @@ void _runErrorTests(){
     });
 
     test('doesn\'t allow codecs to be registered outside of registerTranTypes', (){
-      expect(()=> registerTranCodec('a', null, (_){}, (_){}),
+      expect(()=> registerTranCodec(null, (_){}, (_){}),
           throwsA(new isInstanceOf<TranRegistrationOutsideOfNamespaceError>()));
     });
 
     test('doesn\'t allow subtypes to be registered outside of registerTranTypes', (){
-      expect(()=> registerTranSubtype('a', Object, () => new Object()),
+      expect(()=> registerTranSubtype(Object, () => new Object()),
           throwsA(new isInstanceOf<TranRegistrationOutsideOfNamespaceError>()));
     });
 

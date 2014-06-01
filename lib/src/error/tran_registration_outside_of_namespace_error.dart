@@ -6,7 +6,6 @@ part of transmittable;
 
 class TranRegistrationOutsideOfNamespaceError{
   String get message => 'Calls to registerTranCodec and registerTranSubtype must only be made from within the second parameter of registerTranTypes.';
-  final String key;
   final Type type;
-  const TranRegistrationOutsideOfNamespaceError(String this.key, Type this.type);
+  const TranRegistrationOutsideOfNamespaceError(Type this.type);
 }

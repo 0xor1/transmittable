@@ -57,27 +57,27 @@ of Transmittable simply register them using the same pattern that is used in the
 **Transmittable** library:
 
 ```dart
-bool _tranTypesRegistered = false;
-void _registerTranTypes(){
-  if(_tranTypesRegistered){ return; }
-  _tranTypesRegistered = true;
+bool _tranTranTypesRegistered = false;
+void _registerTranTranTypes(){
+  if(_tranTranTypesRegistered){ return; }
+  _tranTranTypesRegistered = true;
   registerTranTypes('transmittable', '', (){
-    registerTranCodec('_', null, (o)=> '', (s) => null);
-    registerTranCodec(IPK, _InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s)));
-    registerTranCodec('a', num, (num n) => n.toString(), (String s) => num.parse(s));
-    registerTranCodec('b', int, (int i) => i.toString(), (String s) => int.parse(s));
-    registerTranCodec('c', double, (double f) => f.toString(), (String s) => double.parse(s));
-    registerTranCodec('d', String, (String s) => s, (String s) => s);
-    registerTranCodec('e', bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
-    registerTranCodec('f', List, _processIterableToString, (String s) => _processStringBackToListOrSet(new List(), s));
-    registerTranCodec('g', Set, _processIterableToString, (String s) => _processStringBackToListOrSet(new Set(), s));
-    registerTranCodec('h', Map, _processMapToString, _processStringBackToMap);
-    registerTranCodec('i', RegExp, _processRegExpToString, _processStringBackToRegExp);
-    registerTranCodec('j', Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
-    registerTranCodec('k', DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
-    registerTranCodec('l', Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s)));
-    registerTranCodec('m', Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s));
-    registerTranSubtype('n', Transmittable, () => new Transmittable());
+    registerTranCodec(null, (o)=> '', (s) => null);
+    registerTranCodec(_InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s)));
+    registerTranCodec(num, (num n) => n.toString(), (String s) => num.parse(s));
+    registerTranCodec(int, (int i) => i.toString(), (String s) => int.parse(s));
+    registerTranCodec(double, (double f) => f.toString(), (String s) => double.parse(s));
+    registerTranCodec(String, (String s) => s, (String s) => s);
+    registerTranCodec(bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false);
+    registerTranCodec(List, _processIterableToString, (String s) => _processStringBackToListOrSet(new List(), s));
+    registerTranCodec(Set, _processIterableToString, (String s) => _processStringBackToListOrSet(new Set(), s));
+    registerTranCodec(Map, _processMapToString, _processStringBackToMap);
+    registerTranCodec(RegExp, _processRegExpToString, _processStringBackToRegExp);
+    registerTranCodec(Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type);
+    registerTranCodec(DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s));
+    registerTranCodec(Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s)));
+    registerTranCodec(Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)); //TODO will this cause problems if multiple libraries have the same identifiers
+    registerTranSubtype(Transmittable, () => new Transmittable());
   });
 }
 ```
