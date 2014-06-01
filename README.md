@@ -18,7 +18,7 @@ void registerAnimalTranTypes(){
   if(_animalTranTypesRegistered){ return; }
   _animalTranTypesRegistered = true;
   registerTranTypes('Animal', 'a', (){
-    registerTranSubtype('cat', Cat, () => new Cat());
+    registerTranSubtype(Cat, () => new Cat());
   });
 }
 

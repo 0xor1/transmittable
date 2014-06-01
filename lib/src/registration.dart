@@ -38,17 +38,17 @@ void registerTranTypes(String namespaceFull, String namespace, void registerType
 
 /**
  * Register a [subtype] of [Transmittable] along with a [constructor] function.
- * Calls to this function can only be made inside the last argument of [registerTranTypes].
- * This is to ensure all [key]-[subtype] registrations are properly namespaced.
+ * Calls to this function can only be made inside the function body of the last argument of [registerTranTypes].
+ * This is to ensure all registrations are properly namespaced.
  */
 void registerTranSubtype(Type subtype,  TranConstructor constructor){
   _registerTranCodec(subtype, true, _processTranToString, (String s) => _processStringBackToTran(constructor(), s));
 }
 
 /**
- * Registers a [type] with a given [key] to make it transmittable.
- * Calls to this function can only be made inside the last argument of [registerTranTypes].
- * This is to ensure all [key]-[type] registrations are properly namespaced.
+ * Registers a [type] to make it transmittable.
+ * Calls to this function can only be made inside the function body of the last argument of [registerTranTypes].
+ * This is to ensure all registrations are properly namespaced.
  */
 void registerTranCodec(Type type, TranEncode encode, TranDecode decode) =>_registerTranCodec(type, false, encode, decode);
 
