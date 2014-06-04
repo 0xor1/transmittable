@@ -7,5 +7,5 @@ part of transmittable;
 class UnregisteredTypeError{
   String get message => 'Type "$type" has not been registered with registerTranType().';
   final Type type;
-  const UnregisteredTypeError(Type this.type);
+  const UnregisteredTypeError(this.type);
 }
