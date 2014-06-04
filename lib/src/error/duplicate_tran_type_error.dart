@@ -8,5 +8,5 @@ class DuplicateTranTypeError{
   String get message => 'Type "$type" has already been registered.';
   final Type type;
   final Map<Type, String> mapping = getRegisteredMappingsByType();
-  const DuplicateTranTypeError(Type this.type);
+  const DuplicateTranTypeError(this.type);
 }

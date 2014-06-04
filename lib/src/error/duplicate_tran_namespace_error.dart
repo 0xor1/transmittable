@@ -9,5 +9,5 @@ class DuplicateTranNamespaceError{
   final String namespace;
   final String namespaceFull;
   final Map<String, String> registeredNamespaces = _namespaces;
-  DuplicateTranNamespaceError(String this.namespace, String this.namespaceFull);
+  DuplicateTranNamespaceError(this.namespace, this.namespaceFull);
 }

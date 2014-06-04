@@ -60,8 +60,11 @@ void _registerTranCodec(Type type, bool isTranSubtype, TranEncode encode, TranDe
     throw new DuplicateTranTypeError(type);
   }
   String key = '$_currentNamespace${_GetNextKeyForCurrentNamespace()}';
+  if(_tranCodecsByKey.containsKey(key)){
+    throw new DuplicateTranKeyError(key);
+  }
   _tranCodecsByKey[key] = _tranCodecsByType[type] = new _TranCodec(key, type, isTranSubtype, encode, decode);
-  
+
 }
 
 String _GetNextKeyForCurrentNamespace(){

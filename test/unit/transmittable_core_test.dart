@@ -9,17 +9,17 @@ void _runCoreTests(){
     test('KEY_PIECES doesn\'t contain the empty string ""', (){
       expect(KEY_PIECES.contains(''), equals(false));
     });
-    
+
     test('KEY_PIECES doesn\'t contain any duplicate values', (){
       KEY_PIECES.forEach((current){
         expect(KEY_PIECES.where((compare) => compare == current).length, equals(1));
       });
     });
 
-    test('KEY_PIECES doesn\'t contain the $TSD character', (){
+    test('KEY_PIECES doesn\'t contain the "$TSD" character', (){
       expect(KEY_PIECES.contains(TSD), equals(false));
     });
-    
+
     test('supports null',(){
       var tran = new Transmittable()
       ..aNull = null;
@@ -190,7 +190,7 @@ void _runCoreTests(){
       tran.lock();
       expect(tran.pi, equals(3.142));
     });
-    
+
     test('registering more types than the number of KEY_PIECES doesn\'t result in an error', (){
       int registerCount = 0;
       var registerTranCodecWithCounterIncrement = (Type type, TranEncode encode, TranDecode decode){

@@ -7,5 +7,5 @@ part of transmittable;
 class UnresolvableNestedReferenceLoopError{
   String get message => 'transmittable.toTranString() method called in an illegal nested location';
   final Transmittable transmittable;
-  const UnresolvableNestedReferenceLoopError(Transmittable this.transmittable);
+  const UnresolvableNestedReferenceLoopError(this.transmittable);
 }
