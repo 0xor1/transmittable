@@ -7,6 +7,6 @@ part of transmittable;
 class DuplicateTranTypeError{
   String get message => 'Type "$type" has already been registered.';
   final Type type;
-  final Map<Type, String> mapping = getRegisteredMappingsByType();
+  Map<Type, String> get mapping => getRegisteredMappingsByType();
   const DuplicateTranTypeError(this.type);
 }
