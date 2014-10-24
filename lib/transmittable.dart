@@ -16,14 +16,12 @@ part 'src/serialization.dart';
 part 'src/deserialization.dart';
 part 'src/internal_pointer.dart';
 part 'src/error/unresolvable_nested_reference_loop_error.dart';
-part 'src/error/tran_registration_outside_of_namespace_error.dart';
 part 'src/error/tran_method_error.dart';
 part 'src/error/duplicate_tran_type_error.dart';
 part 'src/error/duplicate_tran_key_error.dart';
 part 'src/error/unregistered_tran_codec_error.dart';
 part 'src/error/invalid_tran_namespace_error.dart';
 part 'src/error/duplicate_tran_namespace_error.dart';
-part 'src/error/nested_register_tran_types_call_error.dart';
 part 'src/error/transmittable_locked_error.dart';
 
 const String TRAN_SECTION_DELIMITER = ':';
@@ -41,6 +39,11 @@ const List<String> KEY_PIECES = const [
  * or after deserialization
  */
 typedef dynamic ValueProcessor(dynamic value);
+
+/*
+ * A function used to register a packages transmittable types
+ */
+typedef void Registrar();
 
 Map<Type, String> getRegisteredMappingsByType(){
   var map = new Map<Type, String>();

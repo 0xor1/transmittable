@@ -21,20 +21,14 @@ void _runErrorTests(){
     });
 
     test('doesn\'t allow duplicate type registration', (){
-      expect(()=> registerTranTypes('Transmittable.ErrorTest2', 'tet2', (){
-        registerTranCodec(null, (_){}, (_){}); //null is already registered in core
-      }), throwsA(new isInstanceOf<DuplicateTranTypeError>()));
+      expect(()=> generateRegistrar('Transmittable.ErrorTest2', 'tet2', [
+        new TranRegistration.codec(null, (_){}, (_){}) //null is already registered in core
+      ])(), throwsA(new isInstanceOf<DuplicateTranTypeError>()));
     });
 
     test('doesn\'t allow namespaces to contain the $TSD character', (){
-      expect(()=> registerTranTypes('Transmittable.ErrorTest5', 'tet5$TSD', (){
-      }), throwsA(new isInstanceOf<InvalidTranNamespaceError>()));
-    });
-
-    test('doesn\'t allow nested calls to registerTranTypes', (){
-      expect(()=> registerTranTypes('Transmittable.ErrorTest7', 'tet7', (){
-        registerTranTypes('Transmittable.ErrorTest8', 'tet8', (){});
-      }), throwsA(new isInstanceOf<NestedRegisterTranTypesCallError>()));
+      expect(()=> generateRegistrar('Transmittable.ErrorTest5', 'tet5$TSD', []), 
+          throwsA(new isInstanceOf<InvalidTranNamespaceError>()));
     });
 
     test('doesn\'t support methods', (){
@@ -44,19 +38,8 @@ void _runErrorTests(){
     });
 
     test('doesn\'t allow duplicate namespaces', (){
-      registerTranTypes('Transmittable.ErrorTest9', 'tet9', (){});
-      expect(()=> registerTranTypes('Transmittable.ErrorTest9', 'tet9', (){
-      }), throwsA(new isInstanceOf<DuplicateTranNamespaceError>()));
-    });
-
-    test('doesn\'t allow codecs to be registered outside of registerTranTypes', (){
-      expect(()=> registerTranCodec(null, (_){}, (_){}),
-          throwsA(new isInstanceOf<TranRegistrationOutsideOfNamespaceError>()));
-    });
-
-    test('doesn\'t allow subtypes to be registered outside of registerTranTypes', (){
-      expect(()=> registerTranSubtype(Object, () => new Object()),
-          throwsA(new isInstanceOf<TranRegistrationOutsideOfNamespaceError>()));
+      generateRegistrar('Transmittable.ErrorTest9', 'tet9', []);
+      expect(()=> generateRegistrar('Transmittable.ErrorTest9', 'tet9', []), throwsA(new isInstanceOf<DuplicateTranNamespaceError>()));
     });
 
     test('correctly detects the creation of unresolvable nested reference loops (1)', (){
