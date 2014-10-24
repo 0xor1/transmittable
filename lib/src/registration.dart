@@ -12,7 +12,8 @@ int _currentNamespaceKeyCount = 0;
  * Generates a [Registrar] function that will gaurantee that the argument [registerTypes]
  * can only be called once per environment.
  */
-Registrar generateRegistrar(String namespaceFull, String namespace, Iterable<TranRegistration> registrations){
+Registrar generateRegistrar(String namespaceFull, String namespace, List<TranRegistration> registrations){
+  _registerTranTranTypes();
   if(namespace.contains(TSD)){
     throw new InvalidTranNamespaceError(namespace);
   }
@@ -20,14 +21,11 @@ Registrar generateRegistrar(String namespaceFull, String namespace, Iterable<Tra
     throw new DuplicateTranNamespaceError(namespace, namespaceFull);
   }
   _namespaces[namespace] = namespaceFull;
-  bool called = false;
   return (){
-    if(called) return;
-    called = true;
-    _registerTranTranTypes();
     _currentNamespace = namespace;
     try{
       registrations.forEach((r) => _registerTranCodec(r.type, r.isTranSubtype, r.encode, r.decode));
+      registrations.clear();
     }finally{
       _currentNamespace = null;
       _currentNamespaceKeyCount = 0;      
@@ -99,7 +97,13 @@ class TranRegistration{
   }
 }
 
-Registrar _registerTranTranTypes = generateRegistrar(
+// this bool variable is only needed in the Transmittable library because of the recursive call
+// to _registerTranTranTypes inside all returned Registrar functions
+bool _tranTranTypesRegistered = false;
+void _registerTranTranTypes(){
+  if(_tranTranTypesRegistered) return;
+  _tranTranTypesRegistered = true;
+  generateRegistrar(
     'transmittable',
     '', 
     [
@@ -119,4 +123,5 @@ Registrar _registerTranTranTypes = generateRegistrar(
       new TranRegistration.codec(Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s))),
       new TranRegistration.codec(Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)),
       new TranRegistration.subtype(Transmittable, () => new Transmittable())
-    ]);
+    ])();
+}
