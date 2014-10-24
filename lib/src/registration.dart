@@ -98,7 +98,8 @@ class TranRegistration{
 }
 
 // this bool variable is only needed in the Transmittable library because of the recursive call
-// to _registerTranTranTypes inside all returned Registrar functions
+// to _registerTranTranTypes inside generateRegistrar, no other libraries will need to use this wrapper
+// function and bool variable pattern.
 bool _tranTranTypesRegistered = false;
 void _registerTranTranTypes(){
   if(_tranTranTypesRegistered) return;
