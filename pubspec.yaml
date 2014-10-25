@@ -1,7 +1,7 @@
 name: transmittable
 version: 0.4.1
 author: Daniel Robinson <daniel.robinson.dart@gmail.com>
-description: Provides a simple means of registering types with string keys and codecs to allow them  to be transparently serialized to strings. These types can then be transmitted over http connections with their type information , so they can be fully deserialized on the receiving end to the correct types.
+description: Provides a simple means of registering types with codecs to allow them  to be transparently serialized to strings. These types can then be transmitted over http connections with their type information , so they can be fully deserialized on the receiving end to the correct types.
 homepage: http://github.com/0xor1/transmittable
 dev_dependencies:
   unittest: any
