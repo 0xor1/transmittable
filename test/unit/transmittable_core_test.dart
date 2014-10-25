@@ -191,6 +191,13 @@ void _runCoreTests(){
       expect(tran.pi, equals(3.142));
     });
 
+    test('supports clearing of all properties and values', (){
+      var tran = new Transmittable()
+      ..pi = 3.142;
+      tran.clear();
+      expect(tran.pi, equals(null));
+    });
+
     test('registering more types than the number of KEY_PIECES doesn\'t result in an error', (){
       int registerCount = 0;
       var registerTranCodecWithCounterIncrement = (Type type, TranEncode encode, TranDecode decode){

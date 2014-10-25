@@ -2,9 +2,7 @@
  * Author:  Daniel Robinson http://github.com/0xor1
  */
 
-/**
- * Data structures for de/serializing typed objects to and from strings
- */
+/// Data structures for de/serializing typed objects to and from strings
 library transmittable;
 
 @MirrorsUsed(targets: const[], override: '*')
@@ -24,8 +22,16 @@ part 'src/error/invalid_tran_namespace_error.dart';
 part 'src/error/duplicate_tran_namespace_error.dart';
 part 'src/error/transmittable_locked_error.dart';
 
+/// The string which marks the boundary between sections of a transmittable string key:length:data.
+/// Made public for unit testing purposes.
 const String TRAN_SECTION_DELIMITER = ':';
+
+/// The abbreviated name of [TRAN_SECTION_DELIMITER] for brevity and convenience.
+/// Made public for unit testing purposes.
 const String TSD = TRAN_SECTION_DELIMITER;
+
+/// The list of strings which are used to generate type keys when registering transmittable types.
+/// Made public for unit testing purposes.
 const List<String> KEY_PIECES = const [
   '1', '!', '2', '"', '3', '£', '4', r'$', '5', '%', '6', '^', '7', '&', '8', '*', '9', '(', '0', ')',
   'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F', 'g', 'G', 'h', 'H', 'i', 'I', 'j', 'J',
@@ -34,38 +40,36 @@ const List<String> KEY_PIECES = const [
   ';', "'", '@', '#', '~', '[', '{', ']', '}', '-', '_', '=', '+', '`', '¬'
 ];
 
-/*
- * A function to processes each value either before serialization
- * or after deserialization
- */
 typedef dynamic ValueProcessor(dynamic value);
 
-/*
- * A function used to register a packages transmittable types
- */
 typedef void Registrar();
 
+/// Returns the types that have already been registered and the string keys associated with them.
 Map<Type, String> getRegisteredMappingsByType(){
   var map = new Map<Type, String>();
   _tranCodecsByType.forEach((k, v) => map[k] = v._key);
   return map;
 }
 
+/// Returns the keys that have already been used in registrations and the types associated with them.
 Map<String, Type> getRegisteredMappingsByKey(){
   var map = new Map<String, Type>();
   _tranCodecsByKey.forEach((k, v) => map[k] = v._type);
   return map;
 }
 
+/// An object that can be serialized in to a string and back into its self again.
 @proxy
 class Transmittable{
 
   Map<String, dynamic> _internal = new Map<String, dynamic>();
 
+  /// Creates a new plane Transmittable object.
   Transmittable(){
     _registerTranTranTypes();
   }
 
+  /// Creates a new Transmittable object which is identical to the one which was used to create the string argument.
   factory Transmittable.fromTranString(String s, [ValueProcessor postProcessor = null]){
     _registerTranTranTypes();
     dynamic v;
@@ -82,6 +86,7 @@ class Transmittable{
     return v;
   }
 
+  /// Returns the string representation of this Transmittable object.
   String toTranString([ValueProcessor preProcessor = null]){
     String s;
     try{
@@ -96,10 +101,8 @@ class Transmittable{
     return s;
   }
 
-  /**
-   * Locks the Transmittable object such that calling a setter on it will
-   * throw a [TransmittableLockedError], this is an irreversible process.
-   */
+  /// Locks the Transmittable object such that calling a setter, or clear, on it will
+  /// throw a [TransmittableLockedError], this is an irreversible process.
   void lock(){
     _internal['_locked'] = true;
   }
@@ -130,6 +133,14 @@ class Transmittable{
     super.noSuchMethod(inv);
   }
 
-  void forEach(void f(k, v)) => _internal.forEach(f);
-  void clear() => _internal.clear();
+  /// Iterates over each property on the Transmittable object with its associated value.
+  void forEach(void func(property, value)) => _internal.forEach(f);
+
+  /// Clears the transmittable object wiping all properties and values.
+  void clear(){
+    if(_internal['_locked'] == true){
+      throw new TransmittableLockedError('clear');
+    }
+    _internal.clear();
+  }
 }
