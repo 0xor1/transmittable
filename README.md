@@ -9,8 +9,6 @@ checking during development.
 Extend off of **Transmittable** to make an object transmittable accross a http 
 connection, then explicitly implement an interface for this object, but do not 
 implement any of the interfaces getters/setters which you would like to transmit.
-It is a requirement that classes extending off **Transmittable** implement a 
-default constructor, meaning it is not a named constructor and it takes no arguments.
 
 ```dart
 void registerAnimalTranTypes = generateRegistrar(
@@ -49,7 +47,13 @@ Transmittable can handle, **null**, **int**, **bool**, **String**, **DateTime**,
 effort on the users part.
 
 If you would like to add additional types to be transmittable or to be subtype
-of Transmittable simply register them using the same pattern as below:
+of Transmittable simply register them using the same pattern as below. The `generateRegistrar`
+function takes a full namespace description, in this case `'transmittable'` since it is from the 
+transmittable package, the second argument is the short namespace that will be used in the string
+serializations, in this case the empty string as these are the most common types that will be serialized,
+the last argument is a `List<TranRegistration>` which defines all the types that
+will be transmittable and how they are de/serialized to/from string/actual form, `generateRegistrar`
+returns a `Registrar` function which is then called to register all of the types:
 
 ```dart
 void _registerTranTranTypes = generateRegistrar(
@@ -74,4 +78,4 @@ void _registerTranTranTypes = generateRegistrar(
 ```
 Remember this method call must be made on both the client side and the server
 side. This is usually best achieved by both server and client side libraries
-referencing a common interface library which contains this method.
+referencing a common interface library which contains this function. 

@@ -8,10 +8,8 @@ final Map<String, String> _namespaces = new Map<String, String>();
 String _currentNamespace = null;
 int _currentNamespaceKeyCount = 0;
 
-/*
- * Generates a [Registrar] function that will gaurantee that the argument [registerTypes]
- * can only be called once per environment.
- */
+/// Returns a [Registrar] function that will register the codecs in [registrations]
+/// upon being called.
 Registrar generateRegistrar(String namespaceFull, String namespace, List<TranRegistration> registrations){
   _registerTranTranTypes();
   if(namespace.contains(TSD)){
@@ -28,7 +26,7 @@ Registrar generateRegistrar(String namespaceFull, String namespace, List<TranReg
       registrations.clear();
     }finally{
       _currentNamespace = null;
-      _currentNamespaceKeyCount = 0;      
+      _currentNamespaceKeyCount = 0;
     }
   };
 }
@@ -40,7 +38,7 @@ void _registerTranCodec(Type type, bool isTranSubtype, TranEncode encode, TranDe
   String key = '$_currentNamespace${_GetNextKeyForCurrentNamespace()}';
   if(_tranCodecsByKey.containsKey(key)){
     //this should be impossible to hit, but leaving in in case of a bug in the algorithm as it could be tricky to debug otherwise
-    throw new DuplicateTranKeyError(key); 
+    throw new DuplicateTranKeyError(key);
   }
   _tranCodecsByKey[key] = _tranCodecsByType[type] = new _TranCodec(key, type, isTranSubtype, encode, decode);
 
@@ -63,23 +61,20 @@ String _GetNextKeyForCurrentNamespace(){
   return keyBuff.toString();
 }
 
-/**
- * A function which takes an object of type [T] and returns
- * a [String] representation of that object.
- */
+/// A function which takes an object of type [T] and returns
+/// a [String] representation of that object.
 typedef String TranEncode<T>(T obj);
 
-/**
- *  A function which takes a string representation of an
- *  object of type [T] and returns an instance of that object.
- */
+
+///  A function which takes a string representation of an
+///  object of type [T] and returns an instance of that object.
 typedef T TranDecode<T>(String str);
 
-/**
- *  A function which returns a new empty Transmittable type.
- */
+/// A function which returns a new empty Transmittable type.
 typedef T TranConstructor<T extends Transmittable>();
 
+/// An object containing all the required information to successfully register a
+/// transmittable codec.
 class TranRegistration{
   final Type type;
   final bool isTranSubtype;
@@ -87,11 +82,13 @@ class TranRegistration{
   final TranDecode decode;
 
   TranRegistration._internal(this.type, this.isTranSubtype, this.encode, this.decode);
-  
+
+  /// Creates a new TranRegistration for the [type] with the specified [encode] and [decode] functions.
   factory TranRegistration.codec(Type type, TranEncode encode, TranDecode decode){
     return new TranRegistration._internal(type, false, encode, decode);
   }
-  
+
+  /// Creates a new TranRegistration for the transmittable [subtype] with the specified [constructor] function.
   factory TranRegistration.subtype(Type subtype,  TranConstructor constructor){
     return new TranRegistration._internal(subtype, true, _processTranToString, (String s) => _processStringBackToTran(constructor(), s));
   }
@@ -106,7 +103,7 @@ void _registerTranTranTypes(){
   _tranTranTypesRegistered = true;
   generateRegistrar(
     'transmittable',
-    '', 
+    '',
     [
       new TranRegistration.codec(null, (o)=> '', (s) => null),
       new TranRegistration.codec(_InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s))),

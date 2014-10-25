@@ -8,7 +8,7 @@ class DumbyTypeB{}
 
 void _runErrorTests(){
   group('Transmittable (error test)', (){
-    
+
     test('KEY_PIECES doesn\'t allow changes to itself', (){
       expect(() => KEY_PIECES.remove('a'), throwsA(new isInstanceOf<UnsupportedError>()));
       expect(() => KEY_PIECES.add('a'), throwsA(new isInstanceOf<UnsupportedError>()));
@@ -27,7 +27,7 @@ void _runErrorTests(){
     });
 
     test('doesn\'t allow namespaces to contain the $TSD character', (){
-      expect(()=> generateRegistrar('Transmittable.ErrorTest5', 'tet5$TSD', []), 
+      expect(()=> generateRegistrar('Transmittable.ErrorTest5', 'tet5$TSD', []),
           throwsA(new isInstanceOf<InvalidTranNamespaceError>()));
     });
 
@@ -60,6 +60,13 @@ void _runErrorTests(){
       ..pi = 3.142;
       tran.lock();
       expect(() => tran.pi = 2.718, throwsA(new isInstanceOf<TransmittableLockedError>()));
+    });
+
+    test('doesn\'t support clear when the Transmittable is locked', (){
+      var tran = new Transmittable()
+      ..pi = 3.142;
+      tran.lock();
+      expect(() => tran.clear(), throwsA(new isInstanceOf<TransmittableLockedError>()));
     });
 
   });

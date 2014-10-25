@@ -4,8 +4,8 @@
 
 part of transmittable;
 
-const String INTERNAL_POINTER_KEY = '*';
-const String IPK = INTERNAL_POINTER_KEY;
+const String _INTERNAL_POINTER_KEY = '*';
+const String _IPK = _INTERNAL_POINTER_KEY;
 
 class _InternalPointer{
   final int _uniqueValueIndex;
