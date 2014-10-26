@@ -56,7 +56,7 @@ will be transmittable and how they are de/serialized to/from string/actual form,
 returns a `Registrar` function which is then called to register all of the types:
 
 ```dart
-void _registerTranTranTypes = generateRegistrar(
+Registrar _registerTranTranTypes = generateRegistrar(
     'transmittable', '', [
     new TranRegistration.codec(null, (o)=> '', (s) => null),
     new TranRegistration.codec(_InternalPointer, (_InternalPointer ip) => ip._uniqueValueIndex.toString(), (String s) => new _InternalPointer(int.parse(s))),

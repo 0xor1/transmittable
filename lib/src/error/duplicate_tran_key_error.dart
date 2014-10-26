@@ -8,9 +8,9 @@ part of transmittable;
 ///
 /// This Error should never get thrown, it is left in to help with debugging
 /// if there is a bug in the Transmittable registration algorithm.
-class DuplicateTranKeyError{
+class DuplicateTranKeyError extends Error{
   String get message => 'Key "$key" has already been used.';
   final String key;
   Map<String, Type> get mapping => getRegisteredMappingsByKey();
-  const DuplicateTranKeyError(this.key);
+  DuplicateTranKeyError(this.key);
 }

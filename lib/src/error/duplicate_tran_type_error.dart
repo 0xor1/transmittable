@@ -5,9 +5,9 @@
 part of transmittable;
 
 /// Thrown if an attempt is made to register a type which is already registered.
-class DuplicateTranTypeError{
+class DuplicateTranTypeError extends Error{
   String get message => 'Type "$type" has already been registered.';
   final Type type;
   Map<Type, String> get mapping => getRegisteredMappingsByType();
-  const DuplicateTranTypeError(this.type);
+  DuplicateTranTypeError(this.type);
 }

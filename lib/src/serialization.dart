@@ -17,7 +17,7 @@ String _getTranSectionFromValue(dynamic v){
   }
   var tranCodec = _tranCodecsByType[type];
   var tranStr = tranCodec._encode(v);
-  return '${tranCodec._key}$TSD${tranStr.length}$TSD$tranStr';
+  return '${tranCodec._key}$_TSD${tranStr.length}$_TSD$tranStr';
 }
 
 dynamic _valueProcessor(dynamic v){
@@ -81,5 +81,5 @@ String _processRegExpToString(RegExp r){
   var p = r.pattern;
   var c = r.isCaseSensitive? 't': 'f';
   var m = r.isMultiLine? 't': 'f';
-  return '${p.length}$TSD${p}$c$m';
+  return '${p.length}$_TSD${p}$c$m';
 }

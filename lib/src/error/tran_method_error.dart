@@ -5,8 +5,8 @@
 part of transmittable;
 
 /// Thrown if a non existing method is invoked on a [Transmittable] object
-class TranMethodError{
+class TranMethodError extends Error{
   String get message => 'Methods are not transmittable, attempted invocation of method: $methodName';
   final String methodName;
-  const TranMethodError(this.methodName);
+  TranMethodError(this.methodName);
 }

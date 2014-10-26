@@ -6,8 +6,8 @@ part of transmittable;
 
 /// Thrown when serializing a [Transmittable] to a tran string and one of the types
 /// contained on the [Transmittable] object has not been registered.
-class UnregisteredTypeError{
+class UnregisteredTypeError extends Error{
   String get message => 'Type "$type" has not been registered with registerTranType().';
   final Type type;
-  const UnregisteredTypeError(this.type);
+  UnregisteredTypeError(this.type);
 }
