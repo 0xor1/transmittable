@@ -21,6 +21,16 @@ void _runErrorTests(){
       ])(), throwsA(new isInstanceOf<DuplicateTranTypeError>()));
     });
 
+    test('DuplicateTranTypeError contains the existingMappings', (){
+      try{
+        generateRegistrar('Transmittable.ErrorTest3', 'tet3', [
+          new TranRegistration.codec(null, (_){}, (_){}) //null is already registered in core
+        ])();
+      }catch(ex){
+        expect((ex as DuplicateTranTypeError).existingMappings[null] is String, equals(true));
+      }
+    });
+
     test('doesn\'t allow namespaces to contain the _TRAN_SECTION_DELIMITER character', (){
       expect(()=> generateRegistrar('Transmittable.ErrorTest5', 'tet5:', []),
           throwsA(new isInstanceOf<InvalidTranNamespaceError>()));

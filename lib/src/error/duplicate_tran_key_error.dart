@@ -11,6 +11,6 @@ part of transmittable;
 class DuplicateTranKeyError extends Error{
   String get message => 'Key "$key" has already been used.';
   final String key;
-  Map<String, Type> get mapping => getRegisteredMappingsByKey();
+  final Map<String, Type> existingMappings = _registeredMappingsByKey;
   DuplicateTranKeyError(this.key);
 }

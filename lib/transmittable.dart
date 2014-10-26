@@ -53,15 +53,13 @@ typedef dynamic ValueProcessor(dynamic value);
 /// [generateRegistrar] call that created it.
 typedef void Registrar();
 
-/// Returns the types that have already been registered and the string keys associated with them.
-Map<Type, String> getRegisteredMappingsByType(){
+Map<Type, String> get _registeredMappingsByType{
   var map = new Map<Type, String>();
   _tranCodecsByType.forEach((k, v) => map[k] = v._key);
   return map;
 }
 
-/// Returns the keys that have already been used in registrations and the types associated with them.
-Map<String, Type> getRegisteredMappingsByKey(){
+Map<String, Type> get _registeredMappingsByKey{
   var map = new Map<String, Type>();
   _tranCodecsByKey.forEach((k, v) => map[k] = v._type);
   return map;
