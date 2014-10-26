@@ -9,8 +9,8 @@ int _nestedFromTranStringCount = -1;
 
 
 dynamic _getValueFromTranSection(String s){
-  var idx1 = s.indexOf(TSD);
-  var idx2 = s.indexOf(TSD, idx1 + 1);
+  var idx1 = s.indexOf(_TSD);
+  var idx2 = s.indexOf(_TSD, idx1 + 1);
   var key = s.substring(0, idx1);
   var tranCodec = _tranCodecsByKey[key];
   var type = tranCodec._type;
@@ -96,8 +96,8 @@ dynamic _processStringBackToListOrSet(dynamic col, String s){
   int start = 0;
   bool addedToResolveList = false;
   while(start < s.length){
-    var dataLengthStartIdx = s.indexOf(TSD, start) + 1;
-    var dataLengthEndIdx = s.indexOf(TSD, dataLengthStartIdx);
+    var dataLengthStartIdx = s.indexOf(_TSD, start) + 1;
+    var dataLengthEndIdx = s.indexOf(_TSD, dataLengthStartIdx);
     var dataEndIdx = dataLengthEndIdx + int.parse(s.substring(dataLengthStartIdx, dataLengthEndIdx)) + 1;
     var val = _getValueFromTranSection(s.substring(start, dataEndIdx));
     if(addedToResolveList == false && val is _InternalPointer){
@@ -117,8 +117,8 @@ Map<dynamic, dynamic> _processStringBackToMap(String s){
   while(start < s.length){
     var key;
     for(var i = 0; i < 2; i++){
-      var dataLengthStartIdx = s.indexOf(TSD, start) + 1;
-      var dataLengthEndIdx = s.indexOf(TSD, dataLengthStartIdx);
+      var dataLengthStartIdx = s.indexOf(_TSD, start) + 1;
+      var dataLengthEndIdx = s.indexOf(_TSD, dataLengthStartIdx);
       var dataEndIdx = dataLengthEndIdx + int.parse(s.substring(dataLengthStartIdx, dataLengthEndIdx)) + 1;
       if(i == 0){
         key = _getValueFromTranSection(s.substring(start, dataEndIdx));
@@ -140,7 +140,7 @@ Transmittable _processStringBackToTran(Transmittable t, String s){
 }
 
 RegExp _processStringBackToRegExp(String s){
-  var start = s.indexOf(TSD) + 1;
+  var start = s.indexOf(_TSD) + 1;
   var end = start + num.parse(s.substring(0, start - 1));
   var p = s.substring(start, end);
   var c = s.substring(end, end + 1) == 't';

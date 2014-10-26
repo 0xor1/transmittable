@@ -5,8 +5,8 @@
 part of transmittable;
 
 /// Thrown when an unresolvable nested reference loop is detected during serialization to tran string.
-class UnresolvableNestedReferenceLoopError{
+class UnresolvableNestedReferenceLoopError extends Error{
   String get message => 'transmittable.toTranString() method called in an illegal nested location';
   final Transmittable transmittable;
-  const UnresolvableNestedReferenceLoopError(this.transmittable);
+  UnresolvableNestedReferenceLoopError(this.transmittable);
 }

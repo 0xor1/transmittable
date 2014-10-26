@@ -6,20 +6,6 @@ part of TransmittableTest;
 void _runCoreTests(){
   group('Transmittable (core test)', (){
 
-    test('KEY_PIECES doesn\'t contain the empty string ""', (){
-      expect(KEY_PIECES.contains(''), equals(false));
-    });
-
-    test('KEY_PIECES doesn\'t contain any duplicate values', (){
-      KEY_PIECES.forEach((current){
-        expect(KEY_PIECES.where((compare) => compare == current).length, equals(1));
-      });
-    });
-
-    test('KEY_PIECES doesn\'t contain the "$TSD" character', (){
-      expect(KEY_PIECES.contains(TSD), equals(false));
-    });
-
     test('supports null',(){
       var tran = new Transmittable()
       ..aNull = null;
@@ -198,12 +184,13 @@ void _runCoreTests(){
       expect(tran.pi, equals(null));
     });
 
-    test('registering more types than the number of KEY_PIECES doesn\'t result in an error', (){
+    test('registering more types than the number of _KEY_PIECES doesn\'t result in an error', (){
       int registerCount = 0;
       var registerTranCodecWithCounterIncrement = (Type type, TranEncode encode, TranDecode decode){
         registerCount++;
         return new TranRegistration.codec(type, encode, decode);
       };
+      // for this unit test to remain valid it must contain more registrations than the number of keys in _KEY_PIECES
       Registrar registerALotOfCodecs = generateRegistrar('transmittable.key_pieces_test', 'tkpt', [
         registerTranCodecWithCounterIncrement(AA, (o) => '', (s) => new AA()),
         registerTranCodecWithCounterIncrement(AB, (o) => '', (s) => new AB()),
@@ -311,7 +298,6 @@ void _runCoreTests(){
         registerTranCodecWithCounterIncrement(DZ, (o) => '', (s) => new DZ()),
       ]);
       registerALotOfCodecs();
-      expect(registerCount > KEY_PIECES.length, equals(true));
     });
   });
 }

@@ -12,7 +12,7 @@ int _currentNamespaceKeyCount = 0;
 /// upon being called.
 Registrar generateRegistrar(String namespaceFull, String namespace, List<TranRegistration> registrations){
   _registerTranTranTypes();
-  if(namespace.contains(TSD)){
+  if(namespace.contains(_TSD)){
     throw new InvalidTranNamespaceError(namespace);
   }
   if(_namespaces.keys.contains(namespace)){
@@ -46,12 +46,12 @@ void _registerTranCodec(Type type, bool isTranSubtype, TranEncode encode, TranDe
 
 String _GetNextKeyForCurrentNamespace(){
   StringBuffer keyBuff = new StringBuffer();
-  int base = KEY_PIECES.length;
+  int base = _KEY_PIECES.length;
   int tempCount = _currentNamespaceKeyCount;
   do{
     int division = tempCount ~/ base;
     int remainder = tempCount - (division * base);
-    keyBuff.write(KEY_PIECES[remainder]);
+    keyBuff.write(_KEY_PIECES[remainder]);
     if(division == 0){
       break;
     }

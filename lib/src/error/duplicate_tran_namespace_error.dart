@@ -5,7 +5,7 @@
 part of transmittable;
 
 /// Thrown if a call to [generateRegistrar] is made with the same namespace argument.
-class DuplicateTranNamespaceError{
+class DuplicateTranNamespaceError extends Error{
   String get message => 'Namespace "$namespace" has already been registered.';
   final String namespace;
   final String namespaceFull;

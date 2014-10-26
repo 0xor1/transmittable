@@ -9,11 +9,6 @@ class DumbyTypeB{}
 void _runErrorTests(){
   group('Transmittable (error test)', (){
 
-    test('KEY_PIECES doesn\'t allow changes to itself', (){
-      expect(() => KEY_PIECES.remove('a'), throwsA(new isInstanceOf<UnsupportedError>()));
-      expect(() => KEY_PIECES.add('a'), throwsA(new isInstanceOf<UnsupportedError>()));
-    });
-
     test('doesn\'t support unregistered types', (){
       var tran = new Transmittable();
       tran.unreg = new UnregisteredType();
@@ -26,8 +21,8 @@ void _runErrorTests(){
       ])(), throwsA(new isInstanceOf<DuplicateTranTypeError>()));
     });
 
-    test('doesn\'t allow namespaces to contain the $TSD character', (){
-      expect(()=> generateRegistrar('Transmittable.ErrorTest5', 'tet5$TSD', []),
+    test('doesn\'t allow namespaces to contain the _TRAN_SECTION_DELIMITER character', (){
+      expect(()=> generateRegistrar('Transmittable.ErrorTest5', 'tet5:', []),
           throwsA(new isInstanceOf<InvalidTranNamespaceError>()));
     });
 
