@@ -111,7 +111,7 @@ void _registerTranTranTypes(){
       new TranRegistration.codec(int, (int i) => i.toString(), (String s) => int.parse(s)),
       new TranRegistration.codec(double, (double f) => f.toString(), (String s) => double.parse(s)),
       new TranRegistration.codec(String, (String s) => s, (String s) => s),
-      new TranRegistration.codec(bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false),
+      new TranRegistration.codec(bool, (bool b) => b ? 't' : '', (String s) => s == 't' ? true : false),
       new TranRegistration.codec(List, _processIterableToString, (String s) => _processStringBackToListOrSet(new List(), s)),
       new TranRegistration.codec(Set, _processIterableToString, (String s) => _processStringBackToListOrSet(new Set(), s)),
       new TranRegistration.codec(Map, _processMapToString, _processStringBackToMap),
