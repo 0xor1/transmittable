@@ -1,7 +1,7 @@
 /**
  * Author:  Daniel Robinson http://github.com/0xor1
  */
-part of TransmittableTest;
+part of transmittable.test.unit;
 
 class DumbyTypeA{}
 class DumbyTypeB{}
@@ -72,6 +72,10 @@ void _runErrorTests(){
       ..pi = 3.142;
       tran.lock();
       expect(() => tran.clear(), throwsA(new isInstanceOf<TransmittableLockedError>()));
+    });
+
+    test('doesn\'t support setting a property called _isTranLocked', (){
+      expect(() => new Transmittable().._isTranLocked = true, throwsA(new isInstanceOf<ReservedPropertyNameError>()));
     });
 
   });

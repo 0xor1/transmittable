@@ -1,14 +1,14 @@
 /**
  * Author:  Daniel Robinson http://github.com/0xor1
  */
-library TransmittableTest;
+library transmittable.test.unit;
 
 import 'package:transmittable/transmittable.dart';
 import 'package:unittest/unittest.dart';
 
-part 'transmittable_core_test.dart';
-part 'transmittable_internal_pointer_test.dart';
-part 'transmittable_error_test.dart';
+part 'core.dart';
+part 'internal_pointer.dart';
+part 'error.dart';
 
 
 void main(){

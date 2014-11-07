@@ -1,7 +1,7 @@
 /**
  * Author:  Daniel Robinson http://github.com/0xor1
  */
-part of TransmittableTest;
+part of transmittable.test.unit;
 
 void _runCoreTests(){
   group('Transmittable (core test)', (){
@@ -72,9 +72,9 @@ void _runCoreTests(){
       var dt = new DateTime.now();
       var dur = new Duration(days:147, seconds: 78, milliseconds: 2);
       var contents = [12, 'Hi', true, dt, dur];
-      tran.set = new Set()..addAll(contents);
+      tran.aSet = new Set()..addAll(contents);
       var reTran = new Transmittable.fromTranString(tran.toTranString());
-      expect(reTran.set.containsAll(contents), equals(true));
+      expect(reTran.aSet.containsAll(contents), equals(true));
     });
 
     test('supports maps',(){
@@ -182,6 +182,13 @@ void _runCoreTests(){
       ..pi = 3.142;
       tran.clear();
       expect(tran.pi, equals(null));
+    });
+
+    test('supports setting and getting properties via set and get methods', (){
+      var tran = new Transmittable()
+      ..set('pi', 3.142);
+      var reTran = new Transmittable.fromTranString(tran.toTranString());
+      expect(reTran.get('pi'), equals(3.142));
     });
 
     test('registering more types than the number of _KEY_PIECES doesn\'t result in an error', (){
