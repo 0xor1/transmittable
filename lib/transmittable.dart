@@ -21,6 +21,7 @@ part 'src/error/unregistered_tran_codec_error.dart';
 part 'src/error/invalid_tran_namespace_error.dart';
 part 'src/error/duplicate_tran_namespace_error.dart';
 part 'src/error/transmittable_locked_error.dart';
+part 'src/error/reserved_property_name_error.dart';
 
 const String _TRAN_SECTION_DELIMITER = ':';
 
@@ -40,6 +41,9 @@ const List<String> _KEY_PIECES = const [
   'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z', r'\', '|', ',', '<', '.', '>', '/', '?',
   ';', "'", '@', '#', '~', '[', '{', ']', '}', '-', '_', '=', '+', '`', '¬'
 ];
+
+const String _TRAN_LOCKED = '_isTranLocked';
+const String _TL = _TRAN_LOCKED;
 
 /// The signature of a generic value processor function.
 ///
@@ -75,6 +79,7 @@ class Transmittable{
   /// Creates a new plane Transmittable object.
   Transmittable(){
     _registerTranTranTypes();
+    _internal[_TL] = false;
   }
 
   /// Creates a new Transmittable object based on the tranString passed in.
@@ -112,8 +117,10 @@ class Transmittable{
   /// Locks the Transmittable object such that calling a setter, or clear, on it will
   /// throw a [TransmittableLockedError], this is an irreversible process.
   void lock(){
-    _internal['_locked'] = true;
+    _internal[_TL] = true;
   }
+
+  bool get isLocked => _internal[_TL];
 
   noSuchMethod(Invocation inv){
 
@@ -130,10 +137,8 @@ class Transmittable{
       }
       return null;
     }else if(inv.isSetter && positionalArgs == 1){
-      if(_internal['_locked'] == true){
-        throw new TransmittableLockedError(MirrorSystem.getName(inv.memberName));
-      }
-      property = property.replaceAll("=", "");
+      property = property.replaceFirst("=", "");
+      _checkWriteAccess(property);
       _internal[property] = inv.positionalArguments[0];
       return _internal[property];
     }
@@ -146,9 +151,33 @@ class Transmittable{
 
   /// Clears the transmittable object wiping all properties and values.
   void clear(){
-    if(_internal['_locked'] == true){
+    if(isLocked){
       throw new TransmittableLockedError('clear');
     }
     _internal.clear();
+  }
+
+  dynamic get(property){
+    if(property is Symbol){
+      property = MirrorSystem.getName(property);
+    }
+    return _internal[property];
+  }
+
+  void set(property, value){
+    if(property is Symbol){
+      property = MirrorSystem.getName(property);
+    }
+    _checkWriteAccess(property);
+    _internal[property] = value;
+  }
+
+  void _checkWriteAccess(String property){
+    if(isLocked){
+      throw new TransmittableLockedError(property);
+    }
+    if(property == _TL){
+      throw new ReservedPropertyNameError();
+    }
   }
 }
