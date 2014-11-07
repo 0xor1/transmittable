@@ -22,10 +22,19 @@ void main(){
   stopwatch.reset();
   stopwatch.start();
   while(i-- > 0){
+    tran.set(#pi, 3.142);
+  }
+  stopwatch.stop();
+  print('set() method called $iterations times with symbol took ${stopwatch.elapsed}');
+
+  i = iterations;
+  stopwatch.reset();
+  stopwatch.start();
+  while(i-- > 0){
     tran.set('pi', 3.142);
   }
   stopwatch.stop();
-  print('set() method called $iterations times took ${stopwatch.elapsed}');
+  print('set() method called $iterations times with string took ${stopwatch.elapsed}');
 
   i = iterations;
   stopwatch.reset();
@@ -40,8 +49,17 @@ void main(){
   stopwatch.reset();
   stopwatch.start();
   while(i-- > 0){
+    var pi = tran.get(#pi);
+  }
+  stopwatch.stop();
+  print('get() method called $iterations times with symbol took ${stopwatch.elapsed}');
+
+  i = iterations;
+  stopwatch.reset();
+  stopwatch.start();
+  while(i-- > 0){
     var pi = tran.get('pi');
   }
   stopwatch.stop();
-  print('get() method called $iterations times took ${stopwatch.elapsed}');
+  print('get() method called $iterations times with string took ${stopwatch.elapsed}');
 }
