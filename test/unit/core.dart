@@ -184,11 +184,32 @@ void _runCoreTests(){
       expect(tran.pi, equals(null));
     });
 
-    test('supports setting and getting properties via set and get methods', (){
+    test('supports setting properties via set method using string name', (){
       var tran = new Transmittable()
       ..set('pi', 3.142);
       var reTran = new Transmittable.fromTranString(tran.toTranString());
+      expect(reTran.pi, equals(3.142));
+    });
+
+    test('supports setting properties via set method using symbol name', (){
+      var tran = new Transmittable()
+      ..set(#pi, 3.142);
+      var reTran = new Transmittable.fromTranString(tran.toTranString());
+      expect(reTran.pi, equals(3.142));
+    });
+
+    test('supports getting properties via get method using string name', (){
+      var tran = new Transmittable()
+      ..pi = 3.142;
+      var reTran = new Transmittable.fromTranString(tran.toTranString());
       expect(reTran.get('pi'), equals(3.142));
+    });
+
+    test('supports getting properties via get method using symbol name', (){
+      var tran = new Transmittable()
+      ..pi = 3.142;
+      var reTran = new Transmittable.fromTranString(tran.toTranString());
+      expect(reTran.get(#pi), equals(3.142));
     });
 
     test('registering more types than the number of _KEY_PIECES doesn\'t result in an error', (){
