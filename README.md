@@ -7,8 +7,8 @@ checking during development.
 ##How To Use:
 
 Extend off of **Transmittable** to make an object transmittable accross a http 
-connection, then explicitly implement an interface for this object, but do not 
-implement any of the interfaces getters/setters which you would like to transmit.
+connection, then you can implement getters and setters for all of the properties
+you want to have IDE auto completion support for.
 
 ```dart
 void registerAnimalTranTypes = generateRegistrar(
@@ -16,10 +16,11 @@ void registerAnimalTranTypes = generateRegistrar(
     new TranRegistration.subtype(Cat, () => new Cat())
   ]);
 
-class Cat extends Transmittable implements ICat{}
-abstract class ICat{
-  String name;
-  int age;
+class Cat extends Transmittable{
+  String get name => get('name');
+  void set name (String o) => set('name', o);
+  int get age => get('age');
+  void set age (int o) => set('age', o);
 }
 
 void main(){
@@ -42,8 +43,8 @@ void main(){
 
 ##Registered Types
 
-Transmittable can handle, **null**, **int**, **bool**, **String**, **DateTime**, **Duration**,
-**RegExp**, **Symbol**, **List**, **Set** and **Map** out of the box without any need for further 
+Transmittable can handle, **null**, **num**, **int**, **double**, **bool**, **String**, **DateTime**, **Duration**,
+**RegExp**, **Type**, **Symbol**, **List**, **Set** and **Map** out of the box without any need for further 
 effort on the users part.
 
 If you would like to add additional types to be transmittable or to be subtype
@@ -64,7 +65,7 @@ Registrar _registerTranTranTypes = generateRegistrar(
     new TranRegistration.codec(int, (int i) => i.toString(), (String s) => int.parse(s)),
     new TranRegistration.codec(double, (double f) => f.toString(), (String s) => double.parse(s)),
     new TranRegistration.codec(String, (String s) => s, (String s) => s),
-    new TranRegistration.codec(bool, (bool b) => b ? 't' : 'f', (String s) => s == 't' ? true : false),
+    new TranRegistration.codec(bool, (bool b) => b ? 't' : '', (String s) => s == 't' ? true : false),
     new TranRegistration.codec(List, _processIterableToString, (String s) => _processStringBackToListOrSet(new List(), s)),
     new TranRegistration.codec(Set, _processIterableToString, (String s) => _processStringBackToListOrSet(new Set(), s)),
     new TranRegistration.codec(Map, _processMapToString, _processStringBackToMap),
