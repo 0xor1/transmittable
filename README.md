@@ -8,7 +8,11 @@ checking during development.
 
 Extend off of **Transmittable** to make an object transmittable accross a http 
 connection, then you can implement getters and setters for all of the properties
-you want to have IDE auto completion support for.
+you want to have IDE auto completion support for, though this is optional, a transmittable
+object will use noSuchMethod to capture any getter/setter property call and get or set the
+appropriate value. Explicitly declaring getters and setters does provide IDE code completion
+support and it also improves property access performance due to its more direct nature than
+using noSuchMethod.
 
 ```dart
 void registerAnimalTranTypes = generateRegistrar(
