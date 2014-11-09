@@ -363,10 +363,11 @@ class Person{
   int get hashCode => socialSecurity.hashCode;
 }
 
-class Cat extends Transmittable implements ICat{}
-abstract class ICat{
-  String name;
-  int age;
+class Cat extends Transmittable{
+  String get name => get('name');
+  void set name (String o) => set('name', o);
+  int get age => get('age');
+  void set age (int o) => set('age', o);
 }
 
 class AA{}
