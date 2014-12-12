@@ -5,27 +5,23 @@
 /// Data structures for de/serializing typed objects to and from strings
 library transmittable;
 
-@MirrorsUsed(targets: const[], override: '*')
-import 'dart:mirrors';
-
 part 'src/tran_codec.dart';
 part 'src/registration.dart';
 part 'src/serialization.dart';
 part 'src/deserialization.dart';
 part 'src/internal_pointer.dart';
 part 'src/error/unresolvable_nested_reference_loop_error.dart';
-part 'src/error/tran_method_error.dart';
 part 'src/error/duplicate_tran_type_error.dart';
 part 'src/error/duplicate_tran_key_error.dart';
 part 'src/error/unregistered_tran_codec_error.dart';
 part 'src/error/invalid_tran_namespace_error.dart';
 part 'src/error/duplicate_tran_namespace_error.dart';
-part 'src/error/transmittable_locked_error.dart';
-part 'src/error/reserved_property_name_error.dart';
 
 const String _TRAN_SECTION_DELIMITER = ':';
-
 const String _TSD = _TRAN_SECTION_DELIMITER;
+
+const String _READ_ONLY_PROPERTY_FLAG = '*';
+const String _ROPF = _READ_ONLY_PROPERTY_FLAG;
 
 /*
  * It is critical that _KEY_PIECES satisfies the following criteria:
@@ -41,9 +37,6 @@ const List<String> _KEY_PIECES = const [
   'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z', r'\', '|', ',', '<', '.', '>', '/', '?',
   ';', "'", '@', '#', '~', '[', '{', ']', '}', '-', '_', '=', '+', '`', '¬'
 ];
-
-const String _TRAN_LOCKED = '_isTranLocked';
-const String _TL = _TRAN_LOCKED;
 
 /// The signature of a generic value processor function.
 ///
@@ -71,7 +64,6 @@ Map<String, Type> get _registeredMappingsByKey{
 
 /// An object that can be serialized in to a string and back into its self again
 /// allowing named and typed properties to be sent across http connections.
-@proxy
 class Transmittable{
 
   Map<String, dynamic> _internal = new Map<String, dynamic>();
@@ -79,7 +71,6 @@ class Transmittable{
   /// Creates a new plane Transmittable object.
   Transmittable(){
     _registerTranTranTypes();
-    _internal[_TL] = false;
   }
 
   /// Creates a new Transmittable object based on the tranString passed in.
@@ -114,70 +105,13 @@ class Transmittable{
     return s;
   }
 
-  /// Locks the Transmittable object such that calling a setter, or clear, on it will
-  /// throw a [TransmittableLockedError], this is an irreversible process.
-  void lock(){
-    _internal[_TL] = true;
-  }
+  dynamic get(String name) => _internal[name];
 
-  bool get isLocked => _internal[_TL];
-
-  noSuchMethod(Invocation inv){
-
-    if(inv.isMethod){
-      throw new TranMethodError(MirrorSystem.getName(inv.memberName));
-    }
-
-    int positionalArgs = (inv.positionalArguments != null) ? inv.positionalArguments.length : 0;
-    String property = MirrorSystem.getName(inv.memberName);
-
-    if(inv.isGetter && (positionalArgs == 0)){
-      if(_internal.containsKey(property)) {
-        return _internal[property];
-      }
-      return null;
-    }else if(inv.isSetter && positionalArgs == 1){
-      property = property.replaceFirst("=", "");
-      _checkWriteAccess(property);
-      _internal[property] = inv.positionalArguments[0];
-      return _internal[property];
-    }
-
-    super.noSuchMethod(inv);
-  }
-
-  /// Iterates over each property on the Transmittable object with its associated value.
-  void forEach(void func(property, value)) => _internal.forEach(f);
+  dynamic set(String name, value) => _internal[name] = value;
 
   /// Clears the transmittable object wiping all properties and values.
-  void clear(){
-    if(isLocked){
-      throw new TransmittableLockedError('clear');
-    }
-    _internal.clear();
-  }
+  void clear() => _internal.clear();
 
-  dynamic get(property){
-    if(property is Symbol){
-      property = MirrorSystem.getName(property);
-    }
-    return _internal[property];
-  }
-
-  void set(property, value){
-    if(property is Symbol){
-      property = MirrorSystem.getName(property);
-    }
-    _checkWriteAccess(property);
-    _internal[property] = value;
-  }
-
-  void _checkWriteAccess(String property){
-    if(isLocked){
-      throw new TransmittableLockedError(property);
-    }
-    if(property == _TL){
-      throw new ReservedPropertyNameError();
-    }
-  }
+  /// Iterates over each property on the Transmittable object with its associated value.
+  void forEach(void func(name, value)) => _internal.forEach(func);
 }

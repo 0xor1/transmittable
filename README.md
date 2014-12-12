@@ -7,12 +7,7 @@ checking during development.
 ##How To Use:
 
 Extend off of **Transmittable** to make an object transmittable accross a http 
-connection, then you can implement getters and setters for all of the properties
-you want to have IDE auto completion support for, though this is optional, a transmittable
-object will use noSuchMethod to capture any getter/setter property call and get or set the
-appropriate value. Explicitly declaring getters and setters does provide IDE code completion
-support and it also improves property access performance due to its more direct nature than
-using noSuchMethod.
+connection, then implement getters and setters as appropriate.
 
 ```dart
 void registerAnimalTranTypes = generateRegistrar(
@@ -48,7 +43,7 @@ void main(){
 ##Registered Types
 
 Transmittable can handle, **null**, **num**, **int**, **double**, **bool**, **String**, **DateTime**, **Duration**,
-**RegExp**, **Type**, **Symbol**, **List**, **Set** and **Map** out of the box without any need for further 
+**RegExp**, **Type**, **List**, **Set** and **Map** out of the box without any need for further 
 effort on the users part.
 
 If you would like to add additional types to be transmittable or to be subtype
@@ -77,7 +72,6 @@ Registrar _registerTranTranTypes = generateRegistrar(
     new TranRegistration.codec(Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type),
     new TranRegistration.codec(DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s)),
     new TranRegistration.codec(Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s))),
-    new TranRegistration.codec(Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)),
     new TranRegistration.subtype(Transmittable, () => new Transmittable())
   ]);
 ```

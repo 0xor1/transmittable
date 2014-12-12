@@ -10,14 +10,37 @@ final List<dynamic> _uniqueValues = new List<dynamic>();
 String _getTranSectionFromValue(dynamic v){
   v = _valueProcessor(v);
   v = _handleUniqueValues(v);
-  //handle special/subtle types, datetime and duration are the only core types implemented so far that don't seem to have a problem
-  Type type = v == null? null: v is num? num: v is bool? bool: v is String? String: v is List? List: v is Set? Set: v is Map? Map: v is RegExp? RegExp: v is Type? Type: v is Symbol? Symbol: reflect(v).type.reflectedType;
-  if(!_tranCodecsByType.containsKey(type)){
-    throw new UnregisteredTypeError(type);
-  }
-  var tranCodec = _tranCodecsByType[type];
+  var tranCodec = _getTranCodecForValue(v);
   var tranStr = tranCodec._encode(v);
-  return '${tranCodec._key}$_TSD${tranStr.length}$_TSD$tranStr';
+  var strB = new StringBuffer();
+  strB.write(tranCodec._key);
+  strB.write(_TSD);
+  strB.write(tranStr.length);
+  strB.write(_TSD);
+  strB.write(tranStr);
+  return strB.toString();
+}
+
+_TranCodec _getTranCodecForValue(dynamic v){
+  //handle special/subtle types, datetime and duration are the only core types implemented so far that don't seem to have a problem
+  var codec = _tranCodecsByType[v.runtimeType];
+  if(codec != null){
+    return codec;
+  }
+  var type = v == null? null:
+             v is int? int:
+             v is double? double:
+             v is num? num:
+             v is bool? bool:
+             v is String? String:
+             v is List? List:
+             v is Set? Set:
+             v is Map? Map:
+             v is RegExp? RegExp:
+             v is Type? Type:
+             v is Symbol? Symbol:
+             throw new UnregisteredTypeError(v.runtimeType);
+  return _tranCodecsByType[type];
 }
 
 dynamic _valueProcessor(dynamic v){

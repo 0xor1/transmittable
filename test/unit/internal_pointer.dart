@@ -12,18 +12,18 @@ void _runInternalPointerTests(){
 
     test('supports simple reference loops',(){
       var tran = new Transmittable();
-      tran.tran = tran;
+      tran.set('tran', tran);
       var reTran = new Transmittable.fromTranString(tran.toTranString());
-      expect(reTran.tran, equals(reTran));
+      expect(reTran.get('tran'), equals(reTran));
     });
 
     test('supports complex reference loops',(){
       var tran = new Transmittable();
-      tran.aTran = tran;
-      var aLongString = tran.aLongString = 'Hello World, This string should be quite long and easy to spot in the transmittable string.';
-      var map = tran.aMap = new Map();
-      var list = tran.aList = new List();
-      var set = tran.aSet = new Set();
+      tran.set('aTran', tran);
+      var aLongString = tran.set('aLongString', 'Hello World, This string should be quite long and easy to spot in the transmittable string.');
+      var map = tran.set('aMap', new Map());
+      var list = tran.set('aList', new List());
+      var set = tran.set('aSet', new Set());
       map['tran'] = tran;
       map['aLongString'] = aLongString;
       map['map'] = map;
@@ -41,11 +41,11 @@ void _runInternalPointerTests(){
       set.add(set);
       var tranStr = tran.toTranString();
       var reTran = new Transmittable.fromTranString(tran.toTranString());
-      var reALongString = reTran.aLongString;
-      var reMap = reTran.aMap;
-      var reList = reTran.aList;
-      var reSet = reTran.aSet;
-      expect(reTran.aTran, equals(reTran));
+      var reALongString = reTran.get('aLongString');
+      var reMap = reTran.get('aMap');
+      var reList = reTran.get('aList');
+      var reSet = reTran.get('aSet');
+      expect(reTran.get('aTran'), equals(reTran));
       expect(reALongString, equals(aLongString));
       expect(reMap is Map, equals(true));
       expect(reList is List, equals(true));
@@ -69,10 +69,10 @@ void _runInternalPointerTests(){
 
     test('supports non-dangerous nested toTranString calls', (){
       var tran = new Transmittable();
-      tran.avertedDisaster = new PotentialTranDisaster()..tran = new Transmittable();
-      tran.avertedDisaster.tran.tran = tran;
+      tran.set('avertedDisaster', new PotentialTranDisaster()..tran = new Transmittable());
+      tran.get('avertedDisaster').tran.set('tran', tran);
       var reTran = new Transmittable.fromTranString(tran.toTranString());
-      expect(reTran.avertedDisaster is PotentialTranDisaster, equals(true));
+      expect(reTran.get('avertedDisaster') is PotentialTranDisaster, equals(true));
     });
 
   });

@@ -14,16 +14,17 @@ dynamic _getValueFromTranSection(String s){
   var key = s.substring(0, idx1);
   var tranCodec = _tranCodecsByKey[key];
   var type = tranCodec._type;
+  var isCollection = tranCodec._isTranSubtype || type == List || type == Set || type == Map;
   var collectionPlaceholder;
   int collectionPlaceholderIdx;
-  if(tranCodec._isTranSubtype || type == List || type == Set || type == Map){
+  if(isCollection){
     collectionPlaceholder = new Object();
     collectionPlaceholderIdx = _uniqueValues.length;
     _uniqueValues.add(collectionPlaceholder);
   }
   var v = _valueProcessor(tranCodec._decode(s.substring(idx2 + 1)));
   if(v is _InternalPointer){ return v; }
-  if(tranCodec._isTranSubtype || v is List || v is Set || v is Map){
+  if(isCollection){
     _uniqueValues.insert(collectionPlaceholderIdx, v);
     _uniqueValues.remove(collectionPlaceholder);
   }else{
