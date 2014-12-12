@@ -17,9 +17,9 @@ void registerAnimalTranTypes = generateRegistrar(
 
 class Cat extends Transmittable{
   String get name => get('name');
-  void set name (String o) => set('name', o);
+  void set name (String o){set('name', o);}
   int get age => get('age');
-  void set age (int o) => set('age', o);
+  void set age (int o){set('age', o);}
 }
 
 void main(){
@@ -77,4 +77,4 @@ Registrar _registerTranTranTypes = generateRegistrar(
 ```
 Remember this method call must be made on both the client side and the server
 side. This is usually best achieved by both server and client side libraries
-referencing a common interface library which contains this function. 
+referencing a common library which contains this function. 
