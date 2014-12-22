@@ -186,6 +186,17 @@ void _runCoreTests(){
       expect(reTran.get('pi'), equals(3.142));
     });
 
+    test('supports automatic registration of Types using annotations', (){
+      var tran = new a.B()..a = new a.A();
+      var reTran = new Transmittable.fromTranString(tran.toTranString());
+      expect(reTran is a.B, equals(true));
+      expect(reTran.a is a.A, equals(true));
+      tran = new b.B()..a = new b.A();
+      reTran = new Transmittable.fromTranString(tran.toTranString());
+      expect(reTran is b.B, equals(true));
+      expect(reTran.a is b.A, equals(true));
+    });
+
     test('registering more types than the number of _KEY_PIECES doesn\'t result in an error', (){
       int registerCount = 0;
       var registerTranCodecWithCounterIncrement = (Type type, TranEncode encode, TranDecode decode){

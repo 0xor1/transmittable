@@ -5,17 +5,22 @@
 /// Data structures for de/serializing typed objects to and from strings
 library transmittable;
 
+@MirrorsUsed(targets: const[], override: '*')
+import 'dart:mirrors';
+
 part 'src/tran_codec.dart';
 part 'src/registration.dart';
 part 'src/serialization.dart';
 part 'src/deserialization.dart';
 part 'src/internal_pointer.dart';
+part 'src/annotation.dart';
 part 'src/error/unresolvable_nested_reference_loop_error.dart';
 part 'src/error/duplicate_tran_type_error.dart';
 part 'src/error/duplicate_tran_key_error.dart';
 part 'src/error/unregistered_tran_codec_error.dart';
 part 'src/error/invalid_tran_namespace_error.dart';
 part 'src/error/duplicate_tran_namespace_error.dart';
+part 'src/error/duplicate_tran_annotation_identifier_error.dart';
 
 const String _TRAN_SECTION_DELIMITER = ':';
 const String _TSD = _TRAN_SECTION_DELIMITER;
@@ -70,12 +75,12 @@ class Transmittable{
 
   /// Creates a new plane Transmittable object.
   Transmittable(){
-    _registerTranTranTypes();
+    _initTranRegistrations();
   }
 
   /// Creates a new Transmittable object based on the tranString passed in.
   factory Transmittable.fromTranString(String tranStr, [ValueProcessor postProcessor = null]){
-    _registerTranTranTypes();
+    _initTranRegistrations();
     dynamic v;
     try{
       _addNestedfromTranString(postProcessor);

@@ -11,7 +11,7 @@ int _currentNamespaceKeyCount = 0;
 /// Returns a [Registrar] function that will register the codecs in [registrations]
 /// upon being called.
 Registrar generateRegistrar(String namespaceFull, String namespace, List<TranRegistration> registrations){
-  _registerTranTranTypes();
+  _initTranRegistrations();
   if(namespace.contains(_TSD)){
     throw new InvalidTranNamespaceError(namespace);
   }
@@ -102,7 +102,7 @@ void _registerTranTranTypes(){
   if(_tranTranTypesRegistered) return;
   _tranTranTypesRegistered = true;
   generateRegistrar(
-    'transmittable',
+    'transmittable/transmittable',
     '',
     [
       new TranRegistration.codec(null, (o)=> '', (s) => null),
@@ -119,6 +119,7 @@ void _registerTranTranTypes(){
       new TranRegistration.codec(Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type),
       new TranRegistration.codec(DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s)),
       new TranRegistration.codec(Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s))),
+      new TranRegistration.codec(Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)),
       new TranRegistration.subtype(Transmittable, () => new Transmittable())
     ])();
 }
