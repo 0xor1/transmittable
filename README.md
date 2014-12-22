@@ -14,12 +14,7 @@ effort on the users part.
 
 If you would like to add additional types to be transmittable or to be subtype
 of Transmittable, there are two methods. The first method is to use a **Registrar**
-function using the same pattern as below. The `generateRegistrar`
-function takes a full namespace description, in this case `'transmittable'` since it is from the 
-transmittable package, the second argument is the short namespace that will be used in the string
-serializations, in this case the empty string as these are the most common types that will be serialized,
-the last argument is a `List<TranRegistration>` which defines all the types that
-will be transmittable and how they are de/serialized to/from string/actual form, `generateRegistrar`
+function using the same pattern as below. `generateRegistrar`
 returns a `Registrar` function which is then called to register all of the types:
 
 ```dart
@@ -39,7 +34,7 @@ class Cat extends Transmittable{
 }
 ```
 
-Remember the Registrar method must be manually called on both the client side and the server
+The Registrar method must be manually called on both the client side and the server
 side. This is usually best achieved by both server and client side libraries
 referencing a common library which contains this function.
 
