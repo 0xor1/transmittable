@@ -25,9 +25,6 @@ part 'src/error/duplicate_tran_annotation_identifier_error.dart';
 const String _TRAN_SECTION_DELIMITER = ':';
 const String _TSD = _TRAN_SECTION_DELIMITER;
 
-const String _READ_ONLY_PROPERTY_FLAG = '*';
-const String _ROPF = _READ_ONLY_PROPERTY_FLAG;
-
 /*
  * It is critical that _KEY_PIECES satisfies the following criteria:
  *  * Is constant - its values must never change in value or ordering

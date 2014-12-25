@@ -51,7 +51,7 @@ void _initTranRegistrations(){
     lib.metadata.forEach((metaMirror){
 
       var meta = metaMirror.reflectee;
-      if(meta is TranLib){
+      if(meta.runtimeType == TranLib){
         tranLibs[lib] = meta;
       }
 
@@ -69,11 +69,11 @@ void _initTranRegistrations(){
       dec.metadata.forEach((metaMirror){
 
         var meta = metaMirror.reflectee;
-        if(meta is TranSubtype){
+        if(meta.runtimeType == TranSubtype){
           if(subtypes.containsKey(meta.identifier))
             throw new DuplicatedTranAnnotationIdentifierError(tranLib.fullNamespace, meta.identifier);
           subtypes[meta.identifier] = new TypeWithTranMeta(dec.reflectedType, meta);
-        }else if(meta is TranCodec){
+        }else if(meta.runtimeType == TranCodec){
           if(codecs.containsKey(meta.identifier))
             throw new DuplicatedTranAnnotationIdentifierError(tranLib.fullNamespace, meta.identifier);
           codecs[meta.identifier] = new TypeWithTranMeta(dec.reflectedType, meta);
