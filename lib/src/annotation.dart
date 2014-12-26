@@ -23,10 +23,10 @@ class TranSubtype{
   const TranSubtype(this.identifier, this.constructor);
 }
 
-class TypeWithTranMeta<T>{
+class _TypeWithTranMeta<T>{
   final Type type;
   final T tranMeta;
-  const TypeWithTranMeta(this.type, this.tranMeta);
+  const _TypeWithTranMeta(this.type, this.tranMeta);
 }
 
 // in this method we check to ensure that no annotation string id is
@@ -60,8 +60,8 @@ void _initTranRegistrations(){
   });
 
   tranLibs.forEach((lib, tranLib){
-    var codecs = new Map<String, TypeWithTranMeta<TranCodec>>();
-    var subtypes = new Map<String, TypeWithTranMeta<TranSubtype>>();
+    var codecs = new Map<String, _TypeWithTranMeta<TranCodec>>();
+    var subtypes = new Map<String, _TypeWithTranMeta<TranSubtype>>();
 
     lib.declarations.forEach((symbol, dec){
       if(dec is! ClassMirror) return;
@@ -72,11 +72,11 @@ void _initTranRegistrations(){
         if(meta.runtimeType == TranSubtype){
           if(subtypes.containsKey(meta.identifier))
             throw new DuplicatedTranAnnotationIdentifierError(tranLib.fullNamespace, meta.identifier);
-          subtypes[meta.identifier] = new TypeWithTranMeta(dec.reflectedType, meta);
+          subtypes[meta.identifier] = new _TypeWithTranMeta(dec.reflectedType, meta);
         }else if(meta.runtimeType == TranCodec){
           if(codecs.containsKey(meta.identifier))
             throw new DuplicatedTranAnnotationIdentifierError(tranLib.fullNamespace, meta.identifier);
-          codecs[meta.identifier] = new TypeWithTranMeta(dec.reflectedType, meta);
+          codecs[meta.identifier] = new _TypeWithTranMeta(dec.reflectedType, meta);
         }
 
       });
