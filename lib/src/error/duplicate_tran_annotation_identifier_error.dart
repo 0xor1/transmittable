@@ -5,7 +5,7 @@
 part of transmittable;
 
 class DuplicatedTranAnnotationIdentifierError extends Error{
-  String get message => 'Annotation identifier "identifier" is used more than once in "$fullNamespace".';
+  String get message => 'Annotation identifier "$identifier" is used more than once in "$fullNamespace".';
   final String fullNamespace;
   final String identifier;
   DuplicatedTranAnnotationIdentifierError(this.fullNamespace, this.identifier);

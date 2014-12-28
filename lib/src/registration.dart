@@ -10,17 +10,17 @@ int _currentNamespaceKeyCount = 0;
 
 /// Returns a [Registrar] function that will register the codecs in [registrations]
 /// upon being called.
-Registrar generateRegistrar(String namespaceFull, String namespace, List<TranRegistration> registrations){
+Registrar generateRegistrar(String fullNamespace, String shortNamespace, List<TranRegistration> registrations){
   _initTranRegistrations();
-  if(namespace.contains(_TSD)){
-    throw new InvalidTranNamespaceError(namespace);
+  if(shortNamespace.contains(_TSD)){
+    throw new InvalidTranNamespaceError(shortNamespace);
   }
-  if(_namespaces.keys.contains(namespace)){
-    throw new DuplicateTranNamespaceError(namespace, namespaceFull);
+  if(_namespaces.keys.contains(shortNamespace)){
+    throw new DuplicateTranNamespaceError(shortNamespace, fullNamespace);
   }
-  _namespaces[namespace] = namespaceFull;
+  _namespaces[shortNamespace] = fullNamespace;
   return (){
-    _currentNamespace = namespace;
+    _currentNamespace = shortNamespace;
     try{
       registrations.forEach((r) => _registerTranCodec(r.type, r.isTranSubtype, r.encode, r.decode));
       registrations.clear();
