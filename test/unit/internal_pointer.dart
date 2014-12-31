@@ -20,10 +20,14 @@ void _runInternalPointerTests(){
     test('supports complex reference loops',(){
       var tran = new Transmittable();
       tran.set('aTran', tran);
-      var aLongString = tran.set('aLongString', 'Hello World, This string should be quite long and easy to spot in the transmittable string.');
-      var map = tran.set('aMap', new Map());
-      var list = tran.set('aList', new List());
-      var set = tran.set('aSet', new Set());
+      var aLongString = 'Hello World, This string should be quite long and easy to spot in the transmittable string.';
+      tran.set('aLongString', aLongString);
+      var map = new Map();
+      tran.set('aMap', map);
+      var list = new List();
+      tran.set('aList', list);
+      var set = new Set();
+      tran.set('aSet', set);
       map['tran'] = tran;
       map['aLongString'] = aLongString;
       map['map'] = map;

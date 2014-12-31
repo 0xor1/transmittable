@@ -13,7 +13,6 @@ part 'src/registration.dart';
 part 'src/serialization.dart';
 part 'src/deserialization.dart';
 part 'src/internal_pointer.dart';
-part 'src/annotation.dart';
 part 'src/error/unresolvable_nested_reference_loop_error.dart';
 part 'src/error/duplicate_tran_type_error.dart';
 part 'src/error/duplicate_tran_key_error.dart';
@@ -72,12 +71,12 @@ class Transmittable{
 
   /// Creates a new plane Transmittable object.
   Transmittable(){
-    _initTranRegistrations();
+    _registerTranTranTypes();
   }
 
   /// Creates a new Transmittable object based on the tranString passed in.
   factory Transmittable.fromTranString(String tranStr, [ValueProcessor postProcessor = null]){
-    _initTranRegistrations();
+    _registerTranTranTypes();
     dynamic v;
     try{
       _addNestedfromTranString(postProcessor);
@@ -109,7 +108,7 @@ class Transmittable{
 
   dynamic get(String name) => _internal[name];
 
-  dynamic set(String name, value) => _internal[name] = value;
+  void set(String name, value){_internal[name] = value;}
 
   /// Clears the transmittable object wiping all properties and values.
   void clear() => _internal.clear();

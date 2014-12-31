@@ -11,7 +11,7 @@ int _currentNamespaceKeyCount = 0;
 /// Returns a [Registrar] function that will register the codecs in [registrations]
 /// upon being called.
 Registrar generateRegistrar(String fullNamespace, String shortNamespace, List<TranRegistration> registrations){
-  _initTranRegistrations();
+  _registerTranTranTypes();
   if(shortNamespace.contains(_TSD)){
     throw new InvalidTranNamespaceError(shortNamespace);
   }

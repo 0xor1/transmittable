@@ -13,12 +13,11 @@ effort on the users part.
 ## Registering new types
 
 If you would like to add additional types to be transmittable or to be subtype
-of Transmittable, there are two methods. The first method is to use a **Registrar**
-function using the same pattern as below. `generateRegistrar`
+of Transmittable `generateRegistrar`
 returns a `Registrar` function which is then called to register all of the types:
 
 ```dart
-// animal.dart registrar method
+// animal.dart
 library animal;
 
 void registerAnimalTranTypes = generateRegistrar(
@@ -35,37 +34,15 @@ class Cat extends Transmittable{
 ```
 
 The Registrar method must be manually called on both the client side and the server
-side. This is usually best achieved by both server and client side libraries
-referencing a common library which contains this function.
-
-The second method is to use inline **annotations** which is the preferred method as it removes
-the need to add any initialization code to libraries using transmittable types. 
-
-```dart
-// animal.dart annotation method
-@TranLib('animal', 'a')
-library animal;
-
-@TranSubtype('Cat', _CatConst)
-class Cat extends Transmittable{
-  String get name => get('name');
-  void set name (String o){set('name', o);}
-  int get age => get('age');
-  void set age (int o){set('age', o);}
-}
-Cat _CatConst() => new Cat();
-```
-
-The example below uses the `animal.dart annotation method` library from above.
-If it used the `animal.dart registrar method` the first line in `main` would
-need to be `registerAnimalTranTypes();`, as this demonstrates using **annotations** removes
-the need to add in initialization code.
+side.
 
 ```dart
 
 import 'animal.dart';
 
 void main(){
+
+  registerAnimalTranTypes();
   
   Cat c1 = new Cat()
   ..name = 'felix'
