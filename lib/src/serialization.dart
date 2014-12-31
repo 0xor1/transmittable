@@ -38,7 +38,6 @@ _TranCodec _getTranCodecForValue(dynamic v){
              v is Map? Map:
              v is RegExp? RegExp:
              v is Type? Type:
-             v is Symbol? Symbol:
              throw new UnregisteredTypeError(v.runtimeType);
   return _tranCodecsByType[type];
 }
