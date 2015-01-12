@@ -1,5 +1,5 @@
 name: transmittable
-version: 0.12.0
+version: 0.11.1
 author: Daniel Robinson <daniel.robinson.dart@gmail.com>
 description: Provides a simple means of registering types with codecs to allow them  to be transparently de/serialized to/from strings.
 homepage: http://github.com/0xor1/transmittable

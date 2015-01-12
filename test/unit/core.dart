@@ -43,16 +43,14 @@ void _runCoreTests(){
 
     test('supports datetimes',(){
       var tran = new Transmittable();
-      var dt = new DateTime.now();
-      tran.set('datetime', dt);
+      var dt = tran.set('datetime', new DateTime.now());
       var reTran = new Transmittable.fromTranString(tran.toTranString());
       expect(reTran.get('datetime'), equals(dt));
     });
 
     test('supports durations',(){
       var tran = new Transmittable();
-      var dur = new Duration(days:23, seconds: 4, milliseconds: 456);
-      tran.set('duration', dur);
+      var dur = tran.set('duration', new Duration(days:23, seconds: 4, milliseconds: 456));
       var reTran = new Transmittable.fromTranString(tran.toTranString());
       expect(reTran.get('duration'), equals(dur));
     });
@@ -107,8 +105,7 @@ void _runCoreTests(){
 
     test('supports custom types',(){
       var tran = new Transmittable();
-      var person = new Person('Joe Bloggs', 23);
-      tran.set('person', person);
+      var person = tran.set('person', new Person('Joe Bloggs', 23));
       var reTran = new Transmittable.fromTranString(tran.toTranString());
       expect(reTran.get('person'), equals(person));
 
@@ -187,6 +184,17 @@ void _runCoreTests(){
       ..set('pi', 3.142);
       var reTran = new Transmittable.fromTranString(tran.toTranString());
       expect(reTran.get('pi'), equals(3.142));
+    });
+
+    test('supports automatic registration of Types using annotations', (){
+      var tran = new a.B()..a = new a.A();
+      var reTran = new Transmittable.fromTranString(tran.toTranString());
+      expect(reTran is a.B, equals(true));
+      expect(reTran.a is a.A, equals(true));
+      tran = new b.B()..a = new b.A();
+      reTran = new Transmittable.fromTranString(tran.toTranString());
+      expect(reTran is b.B, equals(true));
+      expect(reTran.a is b.A, equals(true));
     });
 
     test('registering more types than the number of _KEY_PIECES doesn\'t result in an error', (){
