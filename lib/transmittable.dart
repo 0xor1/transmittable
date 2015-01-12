@@ -5,6 +5,9 @@
 /// Data structures for de/serializing typed objects to and from strings
 library transmittable;
 
+@MirrorsUsed(targets: const[], override: '*')
+import 'dart:mirrors';
+
 part 'src/tran_codec.dart';
 part 'src/registration.dart';
 part 'src/serialization.dart';

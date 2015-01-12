@@ -119,6 +119,7 @@ void _registerTranTranTypes(){
       new TranRegistration.codec(Type, (Type t) => _processTypeToString(t),(String s) => _tranCodecsByKey[s]._type),
       new TranRegistration.codec(DateTime, (DateTime d) => d.toString(), (String s) => DateTime.parse(s)),
       new TranRegistration.codec(Duration, (Duration dur) => dur.inMilliseconds.toString(), (String s) => new Duration(milliseconds: num.parse(s))),
+      new TranRegistration.codec(Symbol, (Symbol sy) => MirrorSystem.getName(sy), (String s) => MirrorSystem.getSymbol(s)),
       new TranRegistration.subtype(Transmittable, () => new Transmittable())
     ])();
 }
